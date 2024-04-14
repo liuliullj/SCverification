@@ -142,9 +142,9 @@ export const constantRoutes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: "/table",
+    path: "/model",
     component: Layouts,
-    redirect: "/table/element-plus",
+    redirect: "/model/modeling",
     name: "Table",
     meta: {
       title: "可验证智能合约建模",
@@ -152,20 +152,38 @@ export const constantRoutes: RouteRecordRaw[] = [
     },
     children: [
       {
-        path: "element-plus",
-        component: () => import("@/views/table/element-plus/index.vue"),
-        name: "ElementPlus",
+        path: "basic-data",
+        component: () => import("@/views/model/basicdata/index.vue"),
+        name: "BasicData",
         meta: {
-          title: "Element Plus",
+          title: "基础数据类型建模",
           keepAlive: true
         }
       },
       {
-        path: "vxe-table",
-        component: () => import("@/views/table/vxe-table/index.vue"),
-        name: "VxeTable",
+        path: "mapping",
+        component: () => import("@/views/model/mapping/index.vue"),
+        name: "Mapping",
         meta: {
-          title: "Vxe Table",
+          title: "映射类型建模",
+          keepAlive: true
+        }
+      },
+      {
+        path: "interface",
+        component: () => import("@/views/model/interface/index.vue"),
+        name: "Interface",
+        meta: {
+          title: "接口类型建模",
+          keepAlive: true
+        }
+      },
+      {
+        path: "condition",
+        component: () => import("@/views/model/condition/index.vue"),
+        name: "Condition",
+        meta: {
+          title: "条件类型建模",
           keepAlive: true
         }
       }

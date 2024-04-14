@@ -2,13 +2,14 @@ from flask import Blueprint, jsonify, request
 import pymysql
 import pymysql.cursors
 from datetime import datetime
+from db_connect import fetch_all, fetch_one, insert, delete, update
 
 # 创建一个蓝图对象
 design_api_blueprint = Blueprint('design_api', __name__)
 
 # 你可以从原始文件中复制db和cursor的定义到这里，或者使用其他方式导入它们
-db = pymysql.connect(host="127.0.0.1", user="root", password="990326Llj", database="database_learn", port=3306)
-cursor = db.cursor()
+# db = pymysql.connect(host="127.0.0.1", user="root", password="1999511510", database="database_learn", port=3306)
+# cursor = db.cursor()
 
 
 @design_api_blueprint.route('/getDesignData', methods=['POST'])
@@ -21,13 +22,11 @@ def getDesignData():
     table_name = f"{projecname}Demand"
 
     category_filter = "category='执行流程' OR category='方法'"
-    print("getdesign+"+table_name)
+    print("get design+"+table_name)
     fetch_sql = f"SELECT * FROM `{table_name}` WHERE {category_filter} LIMIT %s OFFSET %s"
-    cursor.execute(fetch_sql,(size,offset))
-    demands = cursor.fetchall()
+    demands = fetch_all(fetch_sql, (size,offset))
     count_sql = f"SELECT COUNT(*) AS total FROM `{table_name}` WHERE {category_filter}"
-    cursor.execute(count_sql)
-    total = cursor.fetchone()[0]
+    total = fetch_one(count_sql, None)['total']
     print(demands)
     return jsonify({"list": demands, "total": total})
 
@@ -43,11 +42,9 @@ def getPathData():
     table_name = f"{projecname}Design"
     print("getpath+"+table_name)
     fetch_sql = f"SELECT * FROM `{table_name}` LIMIT %s OFFSET %s"
-    cursor.execute(fetch_sql,(size,offset))
-    designs = cursor.fetchall()
+    designs = fetch_all(fetch_sql, (size, offset))
     count_sql = f"SELECT COUNT(*) AS total FROM `{table_name}`"
-    cursor.execute(count_sql)
-    total = cursor.fetchone()[0]
+    total = fetch_one(count_sql, None)['total']
     print(designs)
     return jsonify({"list": designs, "total": total})
 
@@ -60,15 +57,13 @@ def createDesign():
 
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     tablename = projectname + "Design"
-    get_id_sql = f"SELECT Id FROM `{tablename}` ORDER BY Id DESC LIMIT 1"
-    cursor.execute(get_id_sql)
-    row = cursor.fetchone()
-    max_id = row[0] if row else 0
+    get_id_sql = f"SELECT id FROM `{tablename}` ORDER BY Id DESC LIMIT 1"
+    row = fetch_one(get_id_sql, None)
+    max_id = row['id'] if row else 0
     id_sql = f"ALTER TABLE `{tablename}` AUTO_INCREMENT = {max_id + 1}"
-    cursor.execute(id_sql)
+    update(id_sql, None)
     insert_sql = f"INSERT INTO `{tablename}` (pathname, expression, creattime) VALUES (%s, %s, %s)"
-    cursor.execute(insert_sql, (pathname, expression,  current_time))
-    cursor.connection.commit()
+    insert(insert_sql, (pathname, expression,  current_time))
     print("adddesign!")
     return jsonify({"message": "路径创建成功"}), 200
 
@@ -81,9 +76,8 @@ def updateDesign():
     id = request.form.get('id')
     table_name = projectname+"Design"
     sql = f"UPDATE `{table_name}` SET `pathname` = '{pathname}', `expression` = '{expression}'  WHERE `id` = {id};"
-    cursor.execute(sql)
-    cursor.connection.commit()
-    print("updatedesign!")
+    update(sql, None)
+    print("update design!")
     return jsonify({"message": "路径更新成功"}), 200
 
 
@@ -93,7 +87,6 @@ def deleteDesign():
     id = request.form.get('id')
     table_name = projectname+"Design"
     sql = f"DELETE FROM `{table_name}` WHERE `id` = {id};"
-    cursor.execute(sql)
-    cursor.connection.commit()
+    delete(sql, None)
     print("deletedesign!")
     return jsonify({"message": "路径删除成功"}), 200

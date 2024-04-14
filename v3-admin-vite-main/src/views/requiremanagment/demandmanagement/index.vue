@@ -82,47 +82,6 @@ const handleUpdate = (row: GetTableData) => {
 }
 //endregion
 
-//region 查
-const tableData = ref<GetTableData[]>([])
-const searchFormRef = ref<FormInstance | null>(null)
-const searchData = reactive({
-  name: "",
-  description: ""
-})
-const getTableData = () => {
-  loading.value = true
-  getTableDataApi({
-    currentPage: paginationData.currentPage,
-    size: paginationData.pageSize,
-    name: searchData.name || undefined,
-    description: searchData.description || undefined
-  })
-    .then((data) => {
-      var tableDataList = []
-      for (let index = 0; index < data.list.length; index++) {
-        const element = data.list[index];
-        var tableRow = {
-          "id": element[0],
-          "name": element[1],
-          "description": element[2],
-          "createTime": element[3]
-        }
-        tableDataList.push(tableRow)
-      }
-      paginationData.total = data.total
-      tableData.value = tableDataList
-    })
-    .catch(() => {
-      tableData.value = []
-    })
-    .finally(() => {
-      loading.value = false
-    })
-}
-//endregion
-
-
-
 
 /** 获取项目名称列表*/
 onMounted(() => {
@@ -141,6 +100,9 @@ const fetchProjectNames = () =>{
 const demandData = ref([])
 const selectedProject = ref([]);
 const fetchProjectData = () =>{
+  if (selectedProject.value.length === 0) {
+    return;
+  }
   getDemandDataApi({
     projectname: selectedProject.value,
     currentPage: paginationData.currentPage,
@@ -153,12 +115,12 @@ const fetchProjectData = () =>{
     for (let index = 0; index < data.list.length; index++){
       const element = data.list[index];
       var tableRow = {
-        "id":element[0],
-        "demandname":element[1],
-        "category":element[2],
-        "demanddescription":element[3],
-        "parentD":element[4],
-        "creattime":element[5]
+        "id":element['id'],
+        "demandname":element['demandname'],
+        "category":element['category'],
+        "demanddescription":element['demanddescription'],
+        "parentD":element['parentD'],
+        "creatTime":element['creatTime']
       }
       demandlist.push(tableRow)
     }
@@ -228,7 +190,7 @@ Transaction::=(BlockChain<sub>i</sub>.SmartContract<sub>m</sub>.f<sub>r</sub>),.
           <el-table-column prop="category" label="需求类别" align="center" />
           <el-table-column prop="demanddescription" label="需求描述" align="center" />
           <el-table-column prop="parentD" label="父需求" align="center" />
-          <el-table-column prop="creattime" label="创建时间" align="center" />
+          <el-table-column prop="creatTime" label="创建时间" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
               <el-button type="primary" text bg size="small" @click="handleUpdate(scope.row)">修改</el-button>
