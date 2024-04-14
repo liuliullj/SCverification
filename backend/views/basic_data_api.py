@@ -1,22 +1,8 @@
 from flask import Blueprint, jsonify, request
-import pymysql
-import pymysql.cursors
 from datetime import datetime
 from db_connect import fetch_all, fetch_one, insert, delete, update
 # 创建一个蓝图对象
 basic_data_api_blueprint = Blueprint('basic_data_api', __name__)
-
-# 从原始文件中复制db和cursor的定义到这里，或者使用其他方式导入它们
-# db = pymysql.connect(host="127.0.0.1", user="root", password="1999511510", database="database_learn", port=3306)
-# cursor = db.cursor()
-
-# @basic_data_api_blueprint.route('/getProjectName', methods=['GET'])
-# def getProjectName():
-#     sql = "SELECT name FROM projectmanagement"
-#     result = fetch_all(sql, None)
-#     names = [row['name'] for row in result]
-#     print(names)
-#     return jsonify(names)
 
 @basic_data_api_blueprint.route('/getBasicData', methods=['POST'])
 def getBasicDataData():
@@ -39,6 +25,7 @@ def createBasicData():
     projectname = request.form.get('projectname')
     basicDataName = request.form.get('basicDataName')
     basicDataExpression = request.form.get('basicDataExpression')
+    demandId = request.form.get('demandId')
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     tablename = projectname + "BasicData"
     get_id_sql = f"SELECT id FROM `{tablename}` ORDER BY id DESC LIMIT 1"
@@ -46,9 +33,9 @@ def createBasicData():
     max_id = row['id'] if row else 0
     id_sql = f"ALTER TABLE `{tablename}` AUTO_INCREMENT = {max_id + 1}"
     update(id_sql, None)
-    insert_sql = f"INSERT INTO `{tablename}` (basicDataName, basicDataExpression, creattime) VALUES (%s, %s, %s)"
-    insert(insert_sql, (basicDataName, basicDataExpression, current_time))
-    print("addbasicData!")
+    insert_sql = f"INSERT INTO `{tablename}` (basicDataName, basicDataExpression, demandId, creatTime) VALUES (%s, %s, %s, %s)"
+    insert(insert_sql, (basicDataName, basicDataExpression, demandId, current_time))
+    print("add basicData!")
     return jsonify({"message": "基础数据类型创建成功"}), 200
 
 
@@ -57,11 +44,12 @@ def updateBasicData():
     projectname = request.form.get('projectname')
     basicDataName = request.form.get('basicDataName')
     basicDataExpression = request.form.get('basicDataExpression')
+    demandId = request.form.get('demandId')
     id = request.form.get('id')
     table_name = projectname+"BasicData"
-    sql = f"UPDATE `{table_name}` SET `basicDataName` = '{basicDataName}', `basicDataExpression` = '{basicDataExpression}' WHERE `id` = {id};"
+    sql = f"UPDATE `{table_name}` SET `basicDataName` = '{basicDataName}', `basicDataExpression` = '{basicDataExpression}', `demandId` = '{demandId}' WHERE `id` = {id};"
     update(sql, None)
-    print("updatebasicData!")
+    print("update basicData!")
     return jsonify({"message": "基础数据类型更新成功"}), 200
 
 
@@ -72,5 +60,5 @@ def deleteBasicData():
     table_name = projectname+"BasicData"
     sql = f"DELETE FROM `{table_name}` WHERE `id` = {id};"
     delete(sql, None)
-    print("deletebasicData!")
+    print("delete basicData!")
     return jsonify({"message": "基础数据类型删除成功"}), 200

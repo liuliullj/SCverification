@@ -31,7 +31,8 @@ export function CreatBasicDataDataApi(data:Table.CreateOrUpdateBasicDataRequestD
   var param = {
     'projectname':projectname,
     'basicDataName':data.basicDataName,
-    'basicDataExpression':data.basicDataExpression
+    'basicDataExpression':data.basicDataExpression,
+    'demandId':data.demandId
   }
   console.log("CreatBasicDataDateApi"+qs.stringify(param))
   return axios({
@@ -51,7 +52,8 @@ export function updateBasicDataDataApi(data:Table.CreateOrUpdateBasicDataRequest
     'projectname':projectname,
     'id':data.id,
     'basicDataName':data.basicDataName,
-    'basicDataExpression':data.basicDataExpression
+    'basicDataExpression':data.basicDataExpression,
+    'demandId':data.demandId
   }
   console.log(param)
   // console.log("CreatBasicDataDateApi"+qs.stringify(param))

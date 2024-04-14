@@ -12,11 +12,11 @@ export function getProjectNameApi(){
 }
 
 
-export function getMappingDataApi(paras: Table.GetMappingRequestData){
+export function getSmartContractDataApi(paras: Table.GetSmartContractRequestData){
   console.log(paras)
   return axios({
     method: 'post',
-    url: `${BASE_URL}/myapi/getMapping`,
+    url: `${BASE_URL}/myapi/getSmartContract`,
         data: qs.stringify(paras)
     }).then(function (response) {
         console.log(response);
@@ -27,18 +27,17 @@ export function getMappingDataApi(paras: Table.GetMappingRequestData){
 }
 
 
-export function CreatMappingDataApi(data:Table.CreateOrUpdateMappingRequestData, projectname:string){
+export function CreatSmartContractDataApi(data:Table.CreateOrUpdateSmartContractRequestData, projectname:string){
   var param = {
     'projectname':projectname,
-    'mappingName':data.mappingName,
-    'mappingInputBasicData':data.mappingInputBasicData,
-    'mappingOutputBasicData':data.mappingOutputBasicData,
+    'smartContractName':data.smartContractName,
+    'smartContractEntryItems':data.smartContractEntryItems,
     'demandId':data.demandId
   }
-  console.log("CreatMappingDateApi"+qs.stringify(param))
+  console.log("CreatSmartContractDateApi"+qs.stringify(param))
   return axios({
     method: 'post',
-    url: `${BASE_URL}/myapi/createMapping`,
+    url: `${BASE_URL}/myapi/createSmartContract`,
         data: qs.stringify(param)
     }).then(function (response) {
         console.log(response);
@@ -48,21 +47,20 @@ export function CreatMappingDataApi(data:Table.CreateOrUpdateMappingRequestData,
 }
 
 
-export function updateMappingDataApi(data:Table.CreateOrUpdateMappingRequestData, projectname:string){
+export function updateSmartContractDataApi(data:Table.CreateOrUpdateSmartContractRequestData, projectname:string){
   var param = {
     'projectname':projectname,
     'id':data.id,
-    'mappingName':data.mappingName,
-    'mappingInputBasicData':data.mappingInputBasicData,
-    'mappingOutputBasicData':data.mappingOutputBasicData,
+    'smartContractName':data.smartContractName,
+    'smartContractEntryItems':data.smartContractEntryItems,
     'demandId':data.demandId
   }
   console.log(param)
-  // console.log("CreatMappingDateApi"+qs.stringify(param))
-  //return axios.post(`${BASE_URL}/myapi/updateMapping, param);
+  // console.log("CreatSmartContractDateApi"+qs.stringify(param))
+  //return axios.post(`${BASE_URL}/myapi/updateSmartContract, param);
   return axios({
     method: 'post',
-    url: `${BASE_URL}/myapi/updateMapping`,
+    url: `${BASE_URL}/myapi/updateSmartContract`,
         data: qs.stringify(param)
     }).then(function (response) {
         console.log(response);
@@ -71,7 +69,7 @@ export function updateMappingDataApi(data:Table.CreateOrUpdateMappingRequestData
   });
 }
 
-export function deleteMappingDataApi(id:string, projectname:string){
+export function deleteSmartContractDataApi(id:string, projectname:string){
   var param = {
     'projectname': projectname,
     'id': id
@@ -79,7 +77,7 @@ export function deleteMappingDataApi(id:string, projectname:string){
   console.log(qs.stringify(param))
   return axios({
     method: 'post',
-    url: `${BASE_URL}/myapi/deleteMapping`,
+    url: `${BASE_URL}/myapi/deleteSmartContract`,
         data: qs.stringify(param)
     }).then(function (response) {
         console.log(response);

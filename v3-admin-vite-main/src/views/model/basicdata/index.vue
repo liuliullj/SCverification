@@ -18,14 +18,16 @@ const { paginationData, handleCurrentChange, handleSizeChange } = usePagination(
 const DEFAULT_FORM_DATA: CreateOrUpdateBasicDataRequestData = {
   id: undefined,
   basicDataName: "",
-  basicDataExpression: ""
+  basicDataExpression: "",
+  demandId: ""
 }
 const dialogVisible = ref<boolean>(false)
 const formRef = ref<FormInstance | null>(null)
 const formData = ref<CreateOrUpdateBasicDataRequestData>(JSON.parse(JSON.stringify(DEFAULT_FORM_DATA)))
 const formRules: FormRules<CreateOrUpdateBasicDataRequestData> = {
   basicDataName: [{ required: true, trigger: "blur", message: "请输入基础数据类型名称" }],
-  basicDataExpression: [{ required: true, trigger: "blur", message: "请输入基础数据类型表达式" }]
+  basicDataExpression: [{ required: true, trigger: "blur", message: "请输入基础数据类型表达式" }],
+  demandId: [{ required: true, trigger: "blur", message: "请输入对应需求id" }]
 }
 
 const handleCreateOrUpdateBasicData = () => {
@@ -115,6 +117,7 @@ const fetchBasicData = () =>{
         "id":element['id'],
         "basicDataName":element['basicDataName'],
         "basicDataExpression":element['basicDataExpression'],
+        "demandId":element['demandId'],
         "creatTime":element['creatTime']
       }
       basicDatalist.push(tableRow)
@@ -160,6 +163,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchBa
           <el-table-column prop="id" label="基础数据类型Id" align="center" />
           <el-table-column prop="basicDataName" label="基础数据类型名称" align="center" />
           <el-table-column prop="basicDataExpression" label="基础数据类型表达式" align="center" />
+          <el-table-column prop="demandId" label="对应需求id" align="center" />
           <el-table-column prop="creatTime" label="创建时间" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
@@ -196,6 +200,10 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchBa
         
         <el-form-item prop="basicDataExpression" label="基础数据类型表达式">
           <el-input v-model="formData.basicDataExpression" placeholder="请输入" />
+        </el-form-item>
+
+        <el-form-item prop="demandId" label="对应需求id">
+          <el-input v-model="formData.demandId" placeholder="请输入" />
         </el-form-item>
       </el-form>
       <template #footer>

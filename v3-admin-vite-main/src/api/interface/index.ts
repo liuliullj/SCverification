@@ -32,7 +32,8 @@ export function CreatInterfaceDataApi(data:Table.CreateOrUpdateInterfaceRequestD
     'projectname':projectname,
     'interfaceName':data.interfaceName,
     'interfaceMember':data.interfaceMember,
-    'interfaceMethods':data.interfaceMethods
+    'interfaceMethods':data.interfaceMethods,
+    'demandId':data.demandId
   }
   console.log("CreatInterfaceDateApi"+qs.stringify(param))
   return axios({
@@ -53,7 +54,8 @@ export function updateInterfaceDataApi(data:Table.CreateOrUpdateInterfaceRequest
     'id':data.id,
     'interfaceName':data.interfaceName,
     'interfaceMember':data.interfaceMember,
-    'interfaceMethods':data.interfaceMethods
+    'interfaceMethods':data.interfaceMethods,
+    'demandId':data.demandId
   }
   console.log(param)
   // console.log("CreatInterfaceDateApi"+qs.stringify(param))

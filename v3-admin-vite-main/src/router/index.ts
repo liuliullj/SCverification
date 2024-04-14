@@ -186,6 +186,33 @@ export const constantRoutes: RouteRecordRaw[] = [
           title: "条件类型建模",
           keepAlive: true
         }
+      },
+      {
+        path: "agreement",
+        component: () => import("@/views/model/agreement/index.vue"),
+        name: "Agreement",
+        meta: {
+          title: "合约约定类型建模",
+          keepAlive: true
+        }
+      },
+      {
+        path: "entryItem",
+        component: () => import("@/views/model/entryItem/index.vue"),
+        name: "EntryItem",
+        meta: {
+          title: "合约条目类型建模",
+          keepAlive: true
+        }
+      },
+      {
+        path: "smartContract",
+        component: () => import("@/views/model/smartContract/index.vue"),
+        name: "SmartContract",
+        meta: {
+          title: "智能合约类型建模",
+          keepAlive: true
+        }
       }
     ]
   },

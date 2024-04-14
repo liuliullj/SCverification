@@ -8,7 +8,7 @@ import { usePagination } from "@/hooks/usePagination"
 
 defineOptions({
   // 命名当前组件
-  name: "mapping"
+  name: "Mapping"
 })
 
 const loading = ref<boolean>(false)
@@ -19,7 +19,8 @@ const DEFAULT_FORM_DATA: CreateOrUpdateMappingRequestData = {
   id: undefined,
   mappingName: "",
   mappingInputBasicData: "",
-  mappingOutputBasicData: ""
+  mappingOutputBasicData: "",
+  demandId: ""
 }
 const dialogVisible = ref<boolean>(false)
 const formRef = ref<FormInstance | null>(null)
@@ -27,7 +28,8 @@ const formData = ref<CreateOrUpdateMappingRequestData>(JSON.parse(JSON.stringify
 const formRules: FormRules<CreateOrUpdateMappingRequestData> = {
   mappingName: [{ required: true, trigger: "blur", message: "请输入映射类型名称" }],
   mappingInputBasicData: [{ required: true, trigger: "blur", message: "请输入映射类型输入参数" }],
-  mappingOutputBasicData: [{ required: true, trigger: "blur", message: "请输入映射类型输出参数" }]
+  mappingOutputBasicData: [{ required: true, trigger: "blur", message: "请输入映射类型输出参数" }],
+  demandId: [{ required: true, trigger: "blur", message: "请输入对应需求id" }]
 }
 
 const handleCreateOrUpdateMapping = () => {
@@ -117,6 +119,7 @@ const fetchMapping = () =>{
         "mappingName":element['mappingName'],
         "mappingInputBasicData":element['mappingInputBasicData'],
         "mappingOutputBasicData":element['mappingOutputBasicData'],
+        "demandId":element['demandId'],
         "creatTime":element['creatTime']
       }
       mappinglist.push(tableRow)
@@ -163,6 +166,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchMa
           <el-table-column prop="mappingName" label="映射类型名称" align="center" />
           <el-table-column prop="mappingInputBasicData" label="映射类型输入参数" align="center" />
           <el-table-column prop="mappingOutputBasicData" label="映射类型输出参数" align="center" />
+          <el-table-column prop="demandId" label="对应需求id" align="center" />
           <el-table-column prop="creatTime" label="创建时间" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
@@ -203,6 +207,10 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchMa
 
         <el-form-item prop="mappingOutputBasicData" label="映射类型输出参数">
           <el-input v-model="formData.mappingOutputBasicData" placeholder="请输入" />
+        </el-form-item>
+
+        <el-form-item prop="demandId" label="对应需求id">
+          <el-input v-model="formData.demandId" placeholder="请输入" />
         </el-form-item>
       </el-form>
       <template #footer>

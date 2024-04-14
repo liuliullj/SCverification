@@ -3,6 +3,7 @@ export interface GetMappingRequestData {
   mappingName: string
   mappingInputBasicData: string
   mappingOutputBasicData: string
+  demandId: string
   createTime: string
 }
 
@@ -11,4 +12,5 @@ export interface CreateOrUpdateMappingRequestData{
   mappingName: string
   mappingInputBasicData: string
   mappingOutputBasicData: string
+  demandId: string
 }

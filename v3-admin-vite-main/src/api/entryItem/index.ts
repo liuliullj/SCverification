@@ -12,11 +12,11 @@ export function getProjectNameApi(){
 }
 
 
-export function getMappingDataApi(paras: Table.GetMappingRequestData){
+export function getEntryItemDataApi(paras: Table.GetEntryItemRequestData){
   console.log(paras)
   return axios({
     method: 'post',
-    url: `${BASE_URL}/myapi/getMapping`,
+    url: `${BASE_URL}/myapi/getEntryItem`,
         data: qs.stringify(paras)
     }).then(function (response) {
         console.log(response);
@@ -27,18 +27,18 @@ export function getMappingDataApi(paras: Table.GetMappingRequestData){
 }
 
 
-export function CreatMappingDataApi(data:Table.CreateOrUpdateMappingRequestData, projectname:string){
+export function CreatEntryItemDataApi(data:Table.CreateOrUpdateEntryItemRequestData, projectname:string){
   var param = {
     'projectname':projectname,
-    'mappingName':data.mappingName,
-    'mappingInputBasicData':data.mappingInputBasicData,
-    'mappingOutputBasicData':data.mappingOutputBasicData,
+    'entryItemName':data.entryItemName,
+    'entryItemConditions':data.entryItemConditions,
+    'entryItemAgreements':data.entryItemAgreements,
     'demandId':data.demandId
   }
-  console.log("CreatMappingDateApi"+qs.stringify(param))
+  console.log("CreatEntryItemDateApi"+qs.stringify(param))
   return axios({
     method: 'post',
-    url: `${BASE_URL}/myapi/createMapping`,
+    url: `${BASE_URL}/myapi/createEntryItem`,
         data: qs.stringify(param)
     }).then(function (response) {
         console.log(response);
@@ -48,21 +48,21 @@ export function CreatMappingDataApi(data:Table.CreateOrUpdateMappingRequestData,
 }
 
 
-export function updateMappingDataApi(data:Table.CreateOrUpdateMappingRequestData, projectname:string){
+export function updateEntryItemDataApi(data:Table.CreateOrUpdateEntryItemRequestData, projectname:string){
   var param = {
     'projectname':projectname,
     'id':data.id,
-    'mappingName':data.mappingName,
-    'mappingInputBasicData':data.mappingInputBasicData,
-    'mappingOutputBasicData':data.mappingOutputBasicData,
+    'entryItemName':data.entryItemName,
+    'entryItemConditions':data.entryItemConditions,
+    'entryItemAgreements':data.entryItemAgreements,
     'demandId':data.demandId
   }
   console.log(param)
-  // console.log("CreatMappingDateApi"+qs.stringify(param))
-  //return axios.post(`${BASE_URL}/myapi/updateMapping, param);
+  // console.log("CreatEntryItemDateApi"+qs.stringify(param))
+  //return axios.post(`${BASE_URL}/myapi/updateEntryItem, param);
   return axios({
     method: 'post',
-    url: `${BASE_URL}/myapi/updateMapping`,
+    url: `${BASE_URL}/myapi/updateEntryItem`,
         data: qs.stringify(param)
     }).then(function (response) {
         console.log(response);
@@ -71,7 +71,7 @@ export function updateMappingDataApi(data:Table.CreateOrUpdateMappingRequestData
   });
 }
 
-export function deleteMappingDataApi(id:string, projectname:string){
+export function deleteEntryItemDataApi(id:string, projectname:string){
   var param = {
     'projectname': projectname,
     'id': id
@@ -79,7 +79,7 @@ export function deleteMappingDataApi(id:string, projectname:string){
   console.log(qs.stringify(param))
   return axios({
     method: 'post',
-    url: `${BASE_URL}/myapi/deleteMapping`,
+    url: `${BASE_URL}/myapi/deleteEntryItem`,
         data: qs.stringify(param)
     }).then(function (response) {
         console.log(response);

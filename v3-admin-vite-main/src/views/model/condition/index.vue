@@ -8,7 +8,7 @@ import { usePagination } from "@/hooks/usePagination"
 
 defineOptions({
   // 命名当前组件
-  name: "condition"
+  name: "Condition"
 })
 
 const loading = ref<boolean>(false)
@@ -20,7 +20,8 @@ const DEFAULT_FORM_DATA: CreateOrUpdateConditionRequestData = {
   conditionName: "",
   conditionBasicDataOne: "",
   conditionBasicDataTwo: "",
-  conditionOperator: ""
+  conditionOperator: "",
+  demandId: ""
 }
 const dialogVisible = ref<boolean>(false)
 const formRef = ref<FormInstance | null>(null)
@@ -29,7 +30,8 @@ const formRules: FormRules<CreateOrUpdateConditionRequestData> = {
   conditionName: [{ required: true, trigger: "blur", message: "请输入条件类型名称" }],
   conditionBasicDataOne: [{ required: true, trigger: "blur", message: "请输入条件类型比较对象1" }],
   conditionBasicDataTwo: [{ required: true, trigger: "blur", message: "请输入条件类型比较对象2" }],
-  conditionOperator: [{ required: true, trigger: "blur", message: "请输入条件类型比较运算符" }]
+  conditionOperator: [{ required: true, trigger: "blur", message: "请输入条件类型比较运算符" }],
+  demandId: [{ required: true, trigger: "blur", message: "请输入对应需求id" }]
 }
 
 const handleCreateOrUpdateCondition = () => {
@@ -120,6 +122,7 @@ const fetchCondition = () =>{
         "conditionBasicDataOne":element['conditionBasicDataOne'],
         "conditionBasicDataTwo":element['conditionBasicDataTwo'],
         "conditionOperator":element['conditionOperator'],
+        "demandId":element['demandId'],
         "creatTime":element['creatTime']
       }
       conditionlist.push(tableRow)
@@ -167,6 +170,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchCo
           <el-table-column prop="conditionBasicDataOne" label="条件类型比较对象1" align="center" />
           <el-table-column prop="conditionBasicDataTwo" label="条件类型比较对象2" align="center" />
           <el-table-column prop="conditionOperator" label="条件类型比较运算符" align="center" />
+          <el-table-column prop="demandId" label="对应需求id" align="center" />
           <el-table-column prop="creatTime" label="创建时间" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
@@ -211,6 +215,10 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchCo
 
         <el-form-item prop="conditionOperator" label="条件类型比较运算符">
           <el-input v-model="formData.conditionOperator" placeholder="请输入" />
+        </el-form-item>
+
+        <el-form-item prop="demandId" label="对应需求id">
+          <el-input v-model="formData.demandId" placeholder="请输入" />
         </el-form-item>
       </el-form>
       <template #footer>

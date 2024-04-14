@@ -6,14 +6,17 @@ from flask import Flask, request, jsonify
 from datetime import datetime
 from flask_cors import CORS
 
+from views.agreement_api import agreement_api_blueprint
 from views.basic_data_api import basic_data_api_blueprint
 from db_connect import fetch_all, fetch_one, insert, delete, update
 from views.condition_api import condition_api_blueprint
 from views.demand_api import demand_api_blueprint
 from views.design_api import design_api_blueprint
+from views.entry_item_api import entryItem_api_blueprint
 from views.interface_api import interface_api_blueprint
 
 from views.mapping_api import mapping_api_blueprint
+from views.smartContract_api import smartContract_api_blueprint
 
 app = Flask(__name__)
 
@@ -101,6 +104,7 @@ def createProject():
             `id` INT AUTO_INCREMENT PRIMARY KEY,
             `basicDataName` VARCHAR(255) NOT NULL,
             `basicDataExpression` VARCHAR(255) NOT NULL,
+            `demandId` INT NOT NULL,
             `creatTime` DATETIME DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         """
@@ -114,6 +118,7 @@ def createProject():
                 `mappingName` VARCHAR(255) NOT NULL,
                 `mappingInputBasicData` VARCHAR(255) NOT NULL,
                 `mappingOutputBasicData` VARCHAR(255) NOT NULL,
+                `demandId` INT NOT NULL,
                 `creatTime` DATETIME DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
             """
@@ -127,6 +132,7 @@ def createProject():
                     `interfaceName` VARCHAR(255) NOT NULL,
                     `interfaceMember` VARCHAR(255) NOT NULL,
                     `interfaceMethods` VARCHAR(255) NOT NULL,
+                    `demandId` INT NOT NULL,
                     `creatTime` DATETIME DEFAULT CURRENT_TIMESTAMP
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                 """
@@ -141,10 +147,51 @@ def createProject():
                         `conditionBasicDataOne` VARCHAR(255) NOT NULL,
                         `conditionBasicDataTwo` VARCHAR(255) NOT NULL,
                         `conditionOperator` VARCHAR(255) NOT NULL,
+                        `demandId` INT NOT NULL,
                         `creatTime` DATETIME DEFAULT CURRENT_TIMESTAMP
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                     """
     insert(create_condition_sql, None)
+
+    # 新增项目后创建对应的合约约定类型表
+    table_name = f"{name}Agreement"
+    create_agreement_sql = f"""
+            CREATE TABLE IF NOT EXISTS `{table_name}` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `agreementName` VARCHAR(255) NOT NULL,
+                `agreementInterfaces` VARCHAR(255) NOT NULL,
+                `demandId` INT NOT NULL,
+                `creatTime` DATETIME DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            """
+    insert(create_agreement_sql, None)
+
+    # 新增项目后创建对应的合约条目表
+    table_name = f"{name}EntryItem"
+    create_entryItem_sql = f"""
+                CREATE TABLE IF NOT EXISTS `{table_name}` (
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `entryItemName` VARCHAR(255) NOT NULL,
+                    `entryItemConditions` VARCHAR(255) NOT NULL,
+                    `entryItemAgreements` VARCHAR(255) NOT NULL,
+                    `demandId` INT NOT NULL,
+                    `creatTime` DATETIME DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                """
+    insert(create_entryItem_sql, None)
+
+    # 新增项目后创建对应的智能合约类型表
+    table_name = f"{name}SmartContract"
+    create_smartContract_sql = f"""
+                CREATE TABLE IF NOT EXISTS `{table_name}` (
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `smartContractName` VARCHAR(255) NOT NULL,
+                    `smartContractEntryItems` VARCHAR(255) NOT NULL,
+                    `demandId` INT NOT NULL,
+                    `creatTime` DATETIME DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                """
+    insert(create_smartContract_sql, None)
 
     return jsonify({"message": "项目创建成功"}), 200
 
@@ -185,6 +232,18 @@ def deleteProject():
         conditionName = name + "Condition"
         sql_delete_condition = f"DROP TABLE IF EXISTS `{conditionName}`;"
         delete(sql_delete_condition, None)
+
+        agreementName = name + "Agreement"
+        sql_delete_agreement = f"DROP TABLE IF EXISTS `{agreementName}`;"
+        delete(sql_delete_agreement, None)
+
+        entryItemName = name + "EntryItem"
+        sql_delete_entryItem = f"DROP TABLE IF EXISTS `{entryItemName}`;"
+        delete(sql_delete_entryItem, None)
+
+        smartContractName = name + "SmartContract"
+        sql_delete_smartContract = f"DROP TABLE IF EXISTS `{smartContractName}`;"
+        delete(sql_delete_smartContract, None)
     #删除该行
     sql = "DELETE FROM projectmanagement WHERE id = %s"
     delete(sql, (id,))
@@ -200,36 +259,53 @@ def updateProject():
     print(description)
     sql_ori_name = f"SELECT * FROM projectmanagement WHERE id = {id}"
     result = fetch_one(sql_ori_name, None)
-    ori_name = result['name']+"Demand"
-    new_name = name + "Demand"
-    rename_table_sql = f"RENAME TABLE `{ori_name}` TO `{new_name}`;"
-    update(rename_table_sql, None)
+
+    if result['name'] != name:
+        ori_name = result['name']+"Demand"
+        new_name = name + "Demand"
+        rename_table_sql = f"RENAME TABLE `{ori_name}` TO `{new_name}`;"
+        update(rename_table_sql, None)
 
 
-    ori_design_name = result['name']+"Design"
-    new_design_name = name + "Design"
-    rename_design = f"RENAME TABLE `{ori_design_name}` TO `{new_design_name}`;"
-    update(rename_design, None)
+        ori_design_name = result['name']+"Design"
+        new_design_name = name + "Design"
+        rename_design = f"RENAME TABLE `{ori_design_name}` TO `{new_design_name}`;"
+        update(rename_design, None)
 
-    ori_basic_data_name = result['name'] + "BasicData"
-    new_basic_data_name = name + "BasicData"
-    rename_basic_data = f"RENAME TABLE `{ori_basic_data_name}` TO `{new_basic_data_name}`;"
-    update(rename_basic_data, None)
+        ori_basic_data_name = result['name'] + "BasicData"
+        new_basic_data_name = name + "BasicData"
+        rename_basic_data = f"RENAME TABLE `{ori_basic_data_name}` TO `{new_basic_data_name}`;"
+        update(rename_basic_data, None)
 
-    ori_mapping_name = result['name'] + "Mapping"
-    new_mapping_name = name + "Mapping"
-    rename_mapping = f"RENAME TABLE `{ori_mapping_name}` TO `{new_mapping_name}`;"
-    update(rename_mapping, None)
+        ori_mapping_name = result['name'] + "Mapping"
+        new_mapping_name = name + "Mapping"
+        rename_mapping = f"RENAME TABLE `{ori_mapping_name}` TO `{new_mapping_name}`;"
+        update(rename_mapping, None)
 
-    ori_interface_name = result['name'] + "Interface"
-    new_interface_name = name + "Interface"
-    rename_interface = f"RENAME TABLE `{ori_interface_name}` TO `{new_interface_name}`;"
-    update(rename_interface, None)
+        ori_interface_name = result['name'] + "Interface"
+        new_interface_name = name + "Interface"
+        rename_interface = f"RENAME TABLE `{ori_interface_name}` TO `{new_interface_name}`;"
+        update(rename_interface, None)
 
-    ori_condition_name = result['name'] + "Condition"
-    new_condition_name = name + "Condition"
-    rename_condition = f"RENAME TABLE `{ori_condition_name}` TO `{new_condition_name}`;"
-    update(rename_condition, None)
+        ori_condition_name = result['name'] + "Condition"
+        new_condition_name = name + "Condition"
+        rename_condition = f"RENAME TABLE `{ori_condition_name}` TO `{new_condition_name}`;"
+        update(rename_condition, None)
+
+        ori_agreement_name = result['name'] + "Agreement"
+        new_agreement_name = name + "Agreement"
+        rename_agreement = f"RENAME TABLE `{ori_agreement_name}` TO `{new_agreement_name}`;"
+        update(rename_agreement, None)
+
+        ori_entryItem_name = result['name'] + "EntryItem"
+        new_entryItem_name = name + "EntryItem"
+        rename_entryItem = f"RENAME TABLE `{ori_entryItem_name}` TO `{new_entryItem_name}`;"
+        update(rename_entryItem, None)
+
+        ori_smartContract_name = result['name'] + "SmartContract"
+        new_smartContract_name = name + "SmartContract"
+        rename_smartContract = f"RENAME TABLE `{ori_smartContract_name}` TO `{new_smartContract_name}`;"
+        update(rename_smartContract, None)
 
 
     sql = "UPDATE projectmanagement SET name = %s, description = %s WHERE id = %s"
@@ -240,10 +316,14 @@ def updateProject():
 
 app.register_blueprint(demand_api_blueprint, url_prefix='/myapi')
 app.register_blueprint(design_api_blueprint, url_prefix='/myapi')
+
 app.register_blueprint(basic_data_api_blueprint, url_prefix='/myapi')
 app.register_blueprint(mapping_api_blueprint, url_prefix='/myapi')
 app.register_blueprint(interface_api_blueprint, url_prefix='/myapi')
 app.register_blueprint(condition_api_blueprint, url_prefix='/myapi')
+app.register_blueprint(agreement_api_blueprint, url_prefix='/myapi')
+app.register_blueprint(entryItem_api_blueprint, url_prefix='/myapi')
+app.register_blueprint(smartContract_api_blueprint, url_prefix='/myapi')
 
 
 if __name__ == '__main__':

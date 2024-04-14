@@ -3,6 +3,7 @@ export interface GetInterfaceRequestData {
   interfaceName: string
   interfaceMember: string
   interfaceMethods: string
+  demandId: string
   createTime: string
 }
 
@@ -11,4 +12,5 @@ export interface CreateOrUpdateInterfaceRequestData{
   interfaceName: string
   interfaceMember: string
   interfaceMethods: string
+  demandId: string
 }

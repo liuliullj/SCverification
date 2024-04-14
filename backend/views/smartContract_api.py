@@ -1,0 +1,64 @@
+from flask import Blueprint, jsonify, request
+from datetime import datetime
+from db_connect import fetch_all, fetch_one, insert, delete, update
+# 创建一个蓝图对象
+smartContract_api_blueprint = Blueprint('smartContract_api', __name__)
+
+@smartContract_api_blueprint.route('/getSmartContract', methods=['POST'])
+def getSmartContractData():
+    page = request.form.get('currentPage', default=1, type=int)
+    print(page)
+    size = request.form.get('size', default=10, type=int)
+    offset = (page - 1) * size
+    projecname = request.form.get('projectname')
+    table_name = f"{projecname}SmartContract"
+    fetch_sql = f"SELECT * FROM `{table_name}` LIMIT %s OFFSET %s"
+    smartContracts = fetch_all(fetch_sql,(size,offset))
+    count_sql = f"SELECT COUNT(*) AS total FROM `{table_name}`"
+    total = fetch_one(count_sql, None)['total']
+    print(smartContracts)
+    return jsonify({"list": smartContracts, "total": total})
+
+
+@smartContract_api_blueprint.route('/createSmartContract', methods=['POST'])
+def createSmartContract():
+    projectname = request.form.get('projectname')
+    smartContractName = request.form.get('smartContractName')
+    smartContractEntryItems = request.form.get('smartContractEntryItems')
+    demandId = request.form.get('demandId')
+    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    tablename = projectname + "SmartContract"
+    get_id_sql = f"SELECT id FROM `{tablename}` ORDER BY id DESC LIMIT 1"
+    row = fetch_one(get_id_sql, None)
+    max_id = row['id'] if row else 0
+    id_sql = f"ALTER TABLE `{tablename}` AUTO_INCREMENT = {max_id + 1}"
+    update(id_sql, None)
+    insert_sql = f"INSERT INTO `{tablename}` (smartContractName, smartContractEntryItems, demandId, creatTime) VALUES (%s, %s, %s, %s)"
+    insert(insert_sql, (smartContractName, smartContractEntryItems, demandId, current_time))
+    print("add smartContract!")
+    return jsonify({"message": "智能合约类型创建成功"}), 200
+
+
+@smartContract_api_blueprint.route('/updateSmartContract', methods=['POST'])
+def updateSmartContract():
+    projectname = request.form.get('projectname')
+    smartContractName = request.form.get('smartContractName')
+    smartContractEntryItems = request.form.get('smartContractEntryItems')
+    demandId = request.form.get('demandId')
+    id = request.form.get('id')
+    table_name = projectname+"SmartContract"
+    sql = f"UPDATE `{table_name}` SET `smartContractName` = '{smartContractName}', `smartContractEntryItems` = '{smartContractEntryItems}', `demandId` = '{demandId}' WHERE `id` = {id};"
+    update(sql, None)
+    print("update smartContract!")
+    return jsonify({"message": "智能合约类型更新成功"}), 200
+
+
+@smartContract_api_blueprint.route('/deleteSmartContract', methods=['POST'])
+def deleteSmartContract():
+    projectname = request.form.get('projectname')
+    id = request.form.get('id')
+    table_name = projectname+"SmartContract"
+    sql = f"DELETE FROM `{table_name}` WHERE `id` = {id};"
+    delete(sql, None)
+    print("delete smartContract!")
+    return jsonify({"message": "智能合约类型删除成功"}), 200

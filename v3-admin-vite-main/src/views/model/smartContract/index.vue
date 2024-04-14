@@ -1,47 +1,45 @@
 <script lang="ts" setup>
 import { reactive, ref, watch, onMounted} from "vue"
-import { getProjectNameApi,getInterfaceDataApi, CreatInterfaceDataApi, updateInterfaceDataApi, deleteInterfaceDataApi} from "@/api/interface/index"
-import { type GetInterfaceRequestData ,type CreateOrUpdateInterfaceRequestData} from "@/api/interface/types/table"
+import { getProjectNameApi,getSmartContractDataApi, CreatSmartContractDataApi, updateSmartContractDataApi, deleteSmartContractDataApi} from "@/api/smartContract/index"
+import { type GetSmartContractRequestData ,type CreateOrUpdateSmartContractRequestData} from "@/api/smartContract/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { Search, Refresh, CirclePlus, Delete, Download, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
 
 defineOptions({
   // 命名当前组件
-  name: "Interface"
+  name: "SmartContract"
 })
 
 const loading = ref<boolean>(false)
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
 
 //region 增
-const DEFAULT_FORM_DATA: CreateOrUpdateInterfaceRequestData = {
+const DEFAULT_FORM_DATA: CreateOrUpdateSmartContractRequestData = {
   id: undefined,
-  interfaceName: "",
-  interfaceMember: "",
-  interfaceMethods: "",
+  smartContractName: "",
+  smartContractEntryItems: "",
   demandId: ""
 }
 const dialogVisible = ref<boolean>(false)
 const formRef = ref<FormInstance | null>(null)
-const formData = ref<CreateOrUpdateInterfaceRequestData>(JSON.parse(JSON.stringify(DEFAULT_FORM_DATA)))
-const formRules: FormRules<CreateOrUpdateInterfaceRequestData> = {
-  interfaceName: [{ required: true, trigger: "blur", message: "请输入接口类型名称" }],
-  interfaceMember: [{ required: true, trigger: "blur", message: "请输入接口类型输入参数" }],
-  interfaceMethods: [{ required: true, trigger: "blur", message: "请输入接口类型输出参数" }],
+const formData = ref<CreateOrUpdateSmartContractRequestData>(JSON.parse(JSON.stringify(DEFAULT_FORM_DATA)))
+const formRules: FormRules<CreateOrUpdateSmartContractRequestData> = {
+  smartContractName: [{ required: true, trigger: "blur", message: "请输入智能合约类型名称" }],
+  smartContractEntryItems: [{ required: true, trigger: "blur", message: "请输入智能合约类型组成条目" }],
   demandId: [{ required: true, trigger: "blur", message: "请输入对应需求id" }]
 }
 
-const handleCreateOrUpdateInterface = () => {
+const handleCreateOrUpdateSmartContract = () => {
   formRef.value?.validate((valid: boolean, fields) => {
     if (!valid) return console.error("表单校验不通过", fields)
     loading.value = true
-    const api = formData.value.id === undefined ? CreatInterfaceDataApi : updateInterfaceDataApi
+    const api = formData.value.id === undefined ? CreatSmartContractDataApi : updateSmartContractDataApi
     api(formData.value,selectedProject.value)
       .then(() => {
         ElMessage.success("操作成功")
         dialogVisible.value = false
-        fetchInterface()
+        fetchSmartContract()
       })
       .finally(() => {
         loading.value = false
@@ -56,14 +54,14 @@ const resetForm = () => {
 
 //region 删
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`正在删除接口类型：${row.interfaceName}，确认删除？`, "提示", {
+  ElMessageBox.confirm(`正在删除智能合约类型：${row.smartContractName}，确认删除？`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning"
   }).then(() => {
-    deleteInterfaceDataApi(row.id,selectedProject.value).then(() => {
+    deleteSmartContractDataApi(row.id,selectedProject.value).then(() => {
       ElMessage.success("删除成功");
-      fetchInterface();
+      fetchSmartContract();
     }).catch((error) => {
       // 这里处理API调用失败的情况
       ElMessage.error("删除失败：" + error.message);
@@ -76,16 +74,17 @@ const handleDelete = (row) => {
 //#endregion
 
 //region 改
-const handleUpdate = (row: GetInterfaceRequestData) => {
+const handleUpdate = (row: GetSmartContractRequestData) => {
   dialogVisible.value = true
   formData.value = JSON.parse(JSON.stringify(row))
 }
-//endregion
+
+
 
 
 /** 获取项目名称列表*/
-onMounted(() => {
-  fetchProjectNames();
+onMounted(async () => {
+  await fetchProjectNames();
 });
 const projectNames = ref([])
 const fetchProjectNames = () =>{
@@ -96,14 +95,14 @@ const fetchProjectNames = () =>{
     })
 }
 
-// 获取项目对应的接口类型列表
-const interfaceData = ref([])
+// 获取项目对应的智能合约类型列表
+const smartContractData = ref([])
 const selectedProject = ref([]);
-const fetchInterface = () =>{
+const fetchSmartContract = () =>{
   if (selectedProject.value.length === 0) {
     return;
   }
-  getInterfaceDataApi({
+  getSmartContractDataApi({
     projectname: selectedProject.value,
     currentPage: paginationData.currentPage,
     size: paginationData.size
@@ -111,26 +110,25 @@ const fetchInterface = () =>{
   .then((data) => {
     console.log(data)
     console.log("here")
-    var interfacelist = []
+    var smartContractlist = []
     for (let index = 0; index < data.list.length; index++){
       const element = data.list[index];
       var tableRow = {
         "id":element['id'],
-        "interfaceName":element['interfaceName'],
-        "interfaceMember":element['interfaceMember'],
-        "interfaceMethods":element['interfaceMethods'],
+        "smartContractName":element['smartContractName'],
+        "smartContractEntryItems":element['smartContractEntryItems'],
         "demandId":element['demandId'],
         "creatTime":element['creatTime']
       }
-      interfacelist.push(tableRow)
+      smartContractlist.push(tableRow)
     }
     paginationData.total = data.total
-    interfaceData.value = interfacelist
+    smartContractData.value = smartContractlist
     })
 }
 
 /** 监听分页参数的变化 */
-watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchInterface, { immediate: true })
+watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchSmartContract, { immediate: true })
 
 </script>
 
@@ -138,7 +136,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchIn
   <div class="app-container">
     <el-card v-loading="loading" shadow="never" class="search-wrapper">
       <label for="project-select">请选择一个项目：</label>
-      <el-select v-model="selectedProject" placeholder="请选择一个项目" size=“large” style="width: 240px" @change="fetchInterface">
+      <el-select v-model="selectedProject" placeholder="请选择一个项目" size=“large” style="width: 240px" @change="fetchSmartContract">
         <el-option
           v-for="name in projectNames"
           :key="name"
@@ -150,22 +148,21 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchIn
     <el-card v-loading="loading" shadow="never">
       <div class="toolbar-wrapper">
         <div>
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增接口类型</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增智能合约类型</el-button>
           <el-button type="danger" :icon="Delete">批量删除</el-button>
         </div>
         <div>
           <el-tooltip content="刷新当前页">
-            <el-button type="primary" :icon="RefreshRight" circle @click="fetchInterface" />
+            <el-button type="primary" :icon="RefreshRight" circle @click="fetchSmartContract" />
           </el-tooltip>
         </div>
       </div>
       <div class="table-wrapper">
-        <el-table :data="interfaceData">
+        <el-table :data="smartContractData">
           <el-table-column type="selection" width="50" align="center" />
-          <el-table-column prop="id" label="接口类型Id" align="center" />
-          <el-table-column prop="interfaceName" label="接口类型名称" align="center" />
-          <el-table-column prop="interfaceMember" label="接口类型组成成员" align="center" />
-          <el-table-column prop="interfaceMethods" label="接口类型组成方法" align="center" />
+          <el-table-column prop="id" label="智能合约类型Id" align="center" />
+          <el-table-column prop="smartContractName" label="智能合约类型名称" align="center" />
+          <el-table-column prop="smartContractEntryItems" label="智能合约类型组成条目" align="center" />
           <el-table-column prop="demandId" label="对应需求id" align="center" />
           <el-table-column prop="creatTime" label="创建时间" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
@@ -192,21 +189,17 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchIn
     <!-- 新增/修改 -->
     <el-dialog
       v-model="dialogVisible"
-      :title="formData.id === undefined ? '新增接口类型' : '修改接口类型'"
+      :title="formData.id === undefined ? '新增智能合约类型' : '修改智能合约类型'"
       @closed="resetForm"
       width="30%"
     >
-      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="150px" label-position="left">
-        <el-form-item prop="interfaceName" label="接口类型名称">
-          <el-input v-model="formData.interfaceName" placeholder="请输入" />
+      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="180px" label-position="left">
+        <el-form-item prop="smartContractName" label="智能合约类型名称">
+          <el-input v-model="formData.smartContractName" placeholder="请输入" />
         </el-form-item>
         
-        <el-form-item prop="interfaceMember" label="接口类型组成成员">
-          <el-input v-model="formData.interfaceMember" placeholder="请输入" />
-        </el-form-item>
-
-        <el-form-item prop="interfaceMethods" label="接口类型组成方法">
-          <el-input v-model="formData.interfaceMethods" placeholder="请输入" />
+        <el-form-item prop="smartContractEntryItems" label="智能合约类型组成条目">
+          <el-input v-model="formData.smartContractEntryItems" placeholder="请输入" />
         </el-form-item>
 
         <el-form-item prop="demandId" label="对应需求id">
@@ -215,7 +208,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchIn
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleCreateOrUpdateInterface" :loading="loading">确认</el-button>
+        <el-button type="primary" @click="handleCreateOrUpdateSmartContract" :loading="loading">确认</el-button>
       </template>
     </el-dialog>
   </div>

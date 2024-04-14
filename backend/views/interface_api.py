@@ -27,6 +27,7 @@ def createInterface():
     interfaceName = request.form.get('interfaceName')
     interfaceMember = request.form.get('interfaceMember')
     interfaceMethods = request.form.get('interfaceMethods')
+    demandId = request.form.get('demandId')
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     tablename = projectname + "Interface"
     get_id_sql = f"SELECT id FROM `{tablename}` ORDER BY id DESC LIMIT 1"
@@ -34,8 +35,8 @@ def createInterface():
     max_id = row['id'] if row else 0
     id_sql = f"ALTER TABLE `{tablename}` AUTO_INCREMENT = {max_id + 1}"
     update(id_sql, None)
-    insert_sql = f"INSERT INTO `{tablename}` (interfaceName, interfaceMember, interfaceMethods, creattime) VALUES (%s, %s, %s, %s)"
-    insert(insert_sql, (interfaceName, interfaceMember, interfaceMethods, current_time))
+    insert_sql = f"INSERT INTO `{tablename}` (interfaceName, interfaceMember, interfaceMethods, demandId, creatTime) VALUES (%s, %s, %s, %s, %s)"
+    insert(insert_sql, (interfaceName, interfaceMember, interfaceMethods, demandId, current_time))
     print("add interface!")
     return jsonify({"message": "接口类型创建成功"}), 200
 
@@ -46,9 +47,10 @@ def updateInterface():
     interfaceName = request.form.get('interfaceName')
     interfaceMember = request.form.get('interfaceMember')
     interfaceMethods = request.form.get('interfaceMethods')
+    demandId = request.form.get('demandId')
     id = request.form.get('id')
     table_name = projectname+"Interface"
-    sql = f"UPDATE `{table_name}` SET `interfaceName` = '{interfaceName}', `interfaceMember` = '{interfaceMember}' , `interfaceMethods` = '{interfaceMethods}' WHERE `id` = {id};"
+    sql = f"UPDATE `{table_name}` SET `interfaceName` = '{interfaceName}', `interfaceMember` = '{interfaceMember}', `interfaceMethods` = '{interfaceMethods}', `demandId` = '{demandId}' WHERE `id` = {id};"
     update(sql, None)
     print("update interface!")
     return jsonify({"message": "接口类型更新成功"}), 200

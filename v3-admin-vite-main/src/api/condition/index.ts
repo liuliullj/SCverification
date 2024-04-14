@@ -33,7 +33,8 @@ export function CreatConditionDataApi(data:Table.CreateOrUpdateConditionRequestD
     'conditionName':data.conditionName,
     'conditionBasicDataOne':data.conditionBasicDataOne,
     'conditionBasicDataTwo':data.conditionBasicDataTwo,
-    'conditionOperator':data.conditionOperator
+    'conditionOperator':data.conditionOperator,
+    'demandId':data.demandId
   }
   console.log("CreatConditionDateApi"+qs.stringify(param))
   return axios({
@@ -55,7 +56,8 @@ export function updateConditionDataApi(data:Table.CreateOrUpdateConditionRequest
     'conditionName':data.conditionName,
     'conditionBasicDataOne':data.conditionBasicDataOne,
     'conditionBasicDataTwo':data.conditionBasicDataTwo,
-    'conditionOperator':data.conditionOperator
+    'conditionOperator':data.conditionOperator,
+    'demandId':data.demandId
   }
   console.log(param)
   // console.log("CreatConditionDateApi"+qs.stringify(param))

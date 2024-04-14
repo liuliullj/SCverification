@@ -4,6 +4,7 @@ export interface GetConditionRequestData {
   conditionBasicDataOne: string
   conditionBasicDataTwo: string
   conditionOperator: string
+  demandId: string
   createTime: string
 }
 
@@ -13,4 +14,5 @@ export interface CreateOrUpdateConditionRequestData{
   conditionBasicDataOne: string
   conditionBasicDataTwo: string
   conditionOperator: string
+  demandId: string
 }

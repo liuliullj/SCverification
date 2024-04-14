@@ -28,6 +28,7 @@ def createCondition():
     conditionBasicDataOne = request.form.get('conditionBasicDataOne')
     conditionBasicDataTwo = request.form.get('conditionBasicDataTwo')
     conditionOperator = request.form.get('conditionOperator')
+    demandId = request.form.get('demandId')
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     tablename = projectname + "Condition"
     get_id_sql = f"SELECT id FROM `{tablename}` ORDER BY id DESC LIMIT 1"
@@ -35,8 +36,8 @@ def createCondition():
     max_id = row['id'] if row else 0
     id_sql = f"ALTER TABLE `{tablename}` AUTO_INCREMENT = {max_id + 1}"
     update(id_sql, None)
-    insert_sql = f"INSERT INTO `{tablename}` (conditionName, conditionBasicDataOne, conditionBasicDataTwo, conditionOperator, creattime) VALUES (%s, %s, %s, %s, %s)"
-    insert(insert_sql, (conditionName, conditionBasicDataOne, conditionBasicDataTwo, conditionOperator, current_time))
+    insert_sql = f"INSERT INTO `{tablename}` (conditionName, conditionBasicDataOne, conditionBasicDataTwo, conditionOperator, demandId, creatTime) VALUES (%s, %s, %s, %s, %s, %s)"
+    insert(insert_sql, (conditionName, conditionBasicDataOne, conditionBasicDataTwo, conditionOperator, demandId, current_time))
     print("add condition!")
     return jsonify({"message": "条件类型创建成功"}), 200
 
@@ -48,9 +49,10 @@ def updateCondition():
     conditionBasicDataOne = request.form.get('conditionBasicDataOne')
     conditionBasicDataTwo = request.form.get('conditionBasicDataTwo')
     conditionOperator = request.form.get('conditionOperator')
+    demandId = request.form.get('demandId')
     id = request.form.get('id')
     table_name = projectname+"Condition"
-    sql = f"UPDATE `{table_name}` SET `conditionName` = '{conditionName}', `conditionBasicDataOne` = '{conditionBasicDataOne}' , `conditionBasicDataTwo` = '{conditionBasicDataTwo}'  , `conditionOperator` = '{conditionOperator}' WHERE `id` = {id};"
+    sql = f"UPDATE `{table_name}` SET `conditionName` = '{conditionName}', `conditionBasicDataOne` = '{conditionBasicDataOne}' , `conditionBasicDataTwo` = '{conditionBasicDataTwo}', `conditionOperator` = '{conditionOperator}', `demandId` = '{demandId}' WHERE `id` = {id};"
     update(sql, None)
     print("update condition!")
     return jsonify({"message": "条件类型更新成功"}), 200

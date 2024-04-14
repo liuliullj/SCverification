@@ -6,19 +6,6 @@ from db_connect import fetch_all, fetch_one, insert, delete, update
 # 创建一个蓝图对象
 mapping_api_blueprint = Blueprint('mapping_api', __name__)
 
-# 从原始文件中复制db和cursor的定义到这里，或者使用其他方式导入它们
-# db = pymysql.connect(host="127.0.0.1", user="root", password="1999511510", database="database_learn", port=3306)
-# cursor = db.cursor()
-
-# @mapping_api_blueprint.route('/getProjectName', methods=['GET'])
-# def getProjectName():
-#     sql = "SELECT name FROM projectmanagement"
-#     cursor.execute(sql)
-#     result = cursor.fetchall()
-#     names = [row[0] for row in result]
-#     print(names)
-#     return jsonify(names)
-
 @mapping_api_blueprint.route('/getMapping', methods=['POST'])
 def getMappingData():
     page = request.form.get('currentPage', default=1, type=int)
@@ -41,6 +28,7 @@ def createMapping():
     mappingName = request.form.get('mappingName')
     mappingInputBasicData = request.form.get('mappingInputBasicData')
     mappingOutputBasicData = request.form.get('mappingOutputBasicData')
+    demandId = request.form.get('demandId')
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     tablename = projectname + "Mapping"
     get_id_sql = f"SELECT id FROM `{tablename}` ORDER BY id DESC LIMIT 1"
@@ -48,8 +36,8 @@ def createMapping():
     max_id = row['id'] if row else 0
     id_sql = f"ALTER TABLE `{tablename}` AUTO_INCREMENT = {max_id + 1}"
     update(id_sql, None)
-    insert_sql = f"INSERT INTO `{tablename}` (mappingName, mappingInputBasicData, mappingOutputBasicData, creattime) VALUES (%s, %s, %s, %s)"
-    insert(insert_sql, (mappingName, mappingInputBasicData, mappingOutputBasicData, current_time))
+    insert_sql = f"INSERT INTO `{tablename}` (mappingName, mappingInputBasicData, mappingOutputBasicData, demandId, creatTime) VALUES (%s, %s, %s, %s, %s)"
+    insert(insert_sql, (mappingName, mappingInputBasicData, mappingOutputBasicData, demandId, current_time))
     print("add mapping!")
     return jsonify({"message": "映射类型创建成功"}), 200
 
@@ -60,9 +48,10 @@ def updateMapping():
     mappingName = request.form.get('mappingName')
     mappingInputBasicData = request.form.get('mappingInputBasicData')
     mappingOutputBasicData = request.form.get('mappingOutputBasicData')
+    demandId = request.form.get('demandId')
     id = request.form.get('id')
     table_name = projectname+"Mapping"
-    sql = f"UPDATE `{table_name}` SET `mappingName` = '{mappingName}', `mappingInputBasicData` = '{mappingInputBasicData}' , `mappingOutputBasicData` = '{mappingOutputBasicData}' WHERE `id` = {id};"
+    sql = f"UPDATE `{table_name}` SET `mappingName` = '{mappingName}', `mappingInputBasicData` = '{mappingInputBasicData}', `mappingOutputBasicData` = '{mappingOutputBasicData}', `demandId` = '{demandId}' WHERE `id` = {id};"
     update(sql, None)
     print("update mapping!")
     return jsonify({"message": "映射类型更新成功"}), 200
