@@ -17,6 +17,7 @@ from views.interface_api import interface_api_blueprint
 
 from views.mapping_api import mapping_api_blueprint
 from views.smartContract_api import smartContract_api_blueprint
+from views.structure_api import structure_api_blueprint
 
 app = Flask(__name__)
 
@@ -324,6 +325,8 @@ app.register_blueprint(condition_api_blueprint, url_prefix='/myapi')
 app.register_blueprint(agreement_api_blueprint, url_prefix='/myapi')
 app.register_blueprint(entryItem_api_blueprint, url_prefix='/myapi')
 app.register_blueprint(smartContract_api_blueprint, url_prefix='/myapi')
+
+app.register_blueprint(structure_api_blueprint, url_prefix='/myapi')
 
 
 if __name__ == '__main__':

@@ -33,6 +33,10 @@ const formRules: FormRules<CreateOrUpdateAgreementRequestData> = {
 const handleCreateOrUpdateAgreement = () => {
   formRef.value?.validate((valid: boolean, fields) => {
     if (!valid) return console.error("表单校验不通过", fields)
+    if (selectedProject.value.length === 0) {
+      ElMessage.success("请先选择一个项目")
+      return;
+    }
     loading.value = true
     const api = formData.value.id === undefined ? CreatAgreementDataApi : updateAgreementDataApi
     api(formData.value,selectedProject.value)
@@ -136,7 +140,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchAg
   <div class="app-container">
     <el-card v-loading="loading" shadow="never" class="search-wrapper">
       <label for="project-select">请选择一个项目：</label>
-      <el-select v-model="selectedProject" placeholder="请选择一个项目" size=“large” style="width: 240px" @change="fetchAgreement">
+      <el-select v-model="selectedProject" placeholder="请选择一个项目" size=“large” style="width: 240px" @change="fetchAgreement" @click="fetchProjectNames">
         <el-option
           v-for="name in projectNames"
           :key="name"

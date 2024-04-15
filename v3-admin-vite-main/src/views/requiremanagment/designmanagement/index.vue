@@ -108,7 +108,9 @@ const fetchProjectNames = () =>{
 const demandData = ref([])
 const selectedProject = ref([]);
 const fetchProjectData = async () =>{
-
+  if (selectedProject.value.length === 0) {
+    return;
+  }
   const data = await getDesignDataApi({
       projectname: selectedProject.value,
       currentPage: demandPaginationData.currentPage,
@@ -232,7 +234,7 @@ const handleChange = async () => {
   <div class="app-container">
     <el-card v-loading="loading" shadow="never" class="search-wrapper">
       <label for="project-select">请选择一个项目：</label>
-      <el-select v-model="selectedProject" placeholder="请选择一个项目" size=“large” style="width: 240px" @change="handleChange">
+      <el-select v-model="selectedProject" placeholder="请选择一个项目" size=“large” style="width: 240px" @change="handleChange" @click="fetchProjectNames">
         <el-option
           v-for="name in projectNames"
           :key="name"

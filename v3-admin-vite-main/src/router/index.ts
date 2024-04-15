@@ -144,8 +144,8 @@ export const constantRoutes: RouteRecordRaw[] = [
   {
     path: "/model",
     component: Layouts,
-    redirect: "/model/modeling",
-    name: "Table",
+    redirect: "/model",
+    name: "Model",
     meta: {
       title: "可验证智能合约建模",
       elIcon: "Grid"
@@ -217,9 +217,9 @@ export const constantRoutes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: "/menu",
+    path: "/designcorrect",
     component: Layouts,
-    redirect: "/menu/menu1",
+    redirect: "/designcorrect",
     name: "Menu",
     meta: {
       title: "设计正确性验证",
@@ -227,62 +227,13 @@ export const constantRoutes: RouteRecordRaw[] = [
     },
     children: [
       {
-        path: "menu1",
-        component: () => import("@/views/menu/menu1/index.vue"),
-        redirect: "/menu/menu1/menu1-1",
-        name: "Menu1",
+        path: "structure",
+        component: () => import("@/views/designcorrect/structure/index.vue"),
+        name: "Structure",
         meta: {
-          title: "menu1"
-        },
-        children: [
-          {
-            path: "menu1-1",
-            component: () => import("@/views/menu/menu1/menu1-1/index.vue"),
-            name: "Menu1-1",
-            meta: {
-              title: "menu1-1",
-              keepAlive: true
-            }
-          },
-          {
-            path: "menu1-2",
-            component: () => import("@/views/menu/menu1/menu1-2/index.vue"),
-            redirect: "/menu/menu1/menu1-2/menu1-2-1",
-            name: "Menu1-2",
-            meta: {
-              title: "menu1-2"
-            },
-            children: [
-              {
-                path: "menu1-2-1",
-                component: () => import("@/views/menu/menu1/menu1-2/menu1-2-1/index.vue"),
-                name: "Menu1-2-1",
-                meta: {
-                  title: "menu1-2-1",
-                  keepAlive: true
-                }
-              },
-              {
-                path: "menu1-2-2",
-                component: () => import("@/views/menu/menu1/menu1-2/menu1-2-2/index.vue"),
-                name: "Menu1-2-2",
-                meta: {
-                  title: "menu1-2-2",
-                  keepAlive: true
-                }
-              }
-            ]
-          },
-          {
-            path: "menu1-3",
-            component: () => import("@/views/menu/menu1/menu1-3/index.vue"),
-            name: "Menu1-3",
-            meta: {
-              title: "menu1-3",
-              keepAlive: true
-            }
-          }
-        ]
+          title: "结构正确性验证",
+          keepAlive: true
+        }
       },
       {
         path: "menu2",
