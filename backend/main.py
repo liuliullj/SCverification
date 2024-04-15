@@ -9,6 +9,7 @@ from flask_cors import CORS
 from views.agreement_api import agreement_api_blueprint
 from views.basic_data_api import basic_data_api_blueprint
 from db_connect import fetch_all, fetch_one, insert, delete, update
+from views.call_api import call_api_blueprint
 from views.condition_api import condition_api_blueprint
 from views.demand_api import demand_api_blueprint
 from views.design_api import design_api_blueprint
@@ -16,6 +17,7 @@ from views.entry_item_api import entryItem_api_blueprint
 from views.interface_api import interface_api_blueprint
 
 from views.mapping_api import mapping_api_blueprint
+from views.security_api import security_api_blueprint
 from views.smartContract_api import smartContract_api_blueprint
 from views.structure_api import structure_api_blueprint
 
@@ -327,6 +329,8 @@ app.register_blueprint(entryItem_api_blueprint, url_prefix='/myapi')
 app.register_blueprint(smartContract_api_blueprint, url_prefix='/myapi')
 
 app.register_blueprint(structure_api_blueprint, url_prefix='/myapi')
+app.register_blueprint(call_api_blueprint, url_prefix='/myapi')
+app.register_blueprint(security_api_blueprint, url_prefix='/myapi')
 
 
 if __name__ == '__main__':

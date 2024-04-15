@@ -236,21 +236,21 @@ export const constantRoutes: RouteRecordRaw[] = [
         }
       },
       {
-        path: "menu2",
-        component: () => import("@/views/menu/menu2/index.vue"),
-        name: "Menu2",
+        path: "call",
+        component: () => import("@/views/designcorrect/call/index.vue"),
+        name: "Call",
         meta: {
-          title: "menu2",
+          title: "调用正确性验证",
           keepAlive: true
         }
       }
     ]
   },
   {
-    path: "/hook-demo",
+    path: "/security",
     component: Layouts,
-    redirect: "/hook-demo/use-fetch-select",
-    name: "HookDemo",
+    redirect: "/security",
+    name: "Security",
     meta: {
       title: "合约安全性验证",
       elIcon: "Menu",
@@ -258,27 +258,12 @@ export const constantRoutes: RouteRecordRaw[] = [
     },
     children: [
       {
-        path: "use-fetch-select",
-        component: () => import("@/views/hook-demo/use-fetch-select.vue"),
-        name: "UseFetchSelect",
+        path: "security",
+        component: () => import("@/views/security/index.vue"),
+        name: "Security",
         meta: {
-          title: "useFetchSelect"
-        }
-      },
-      {
-        path: "use-fullscreen-loading",
-        component: () => import("@/views/hook-demo/use-fullscreen-loading.vue"),
-        name: "UseFullscreenLoading",
-        meta: {
-          title: "useFullscreenLoading"
-        }
-      },
-      {
-        path: "use-watermark",
-        component: () => import("@/views/hook-demo/use-watermark.vue"),
-        name: "UseWatermark",
-        meta: {
-          title: "useWatermark"
+          title: "安全性验证",
+          keepAlive: true
         }
       }
     ]

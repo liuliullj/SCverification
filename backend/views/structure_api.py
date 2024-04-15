@@ -61,7 +61,7 @@ def verifyStructure():
     return jsonify({"result": getVerificationResult(projectname, demandId, demandName, expectedExpression)}), 200
 
 
-@structure_api_blueprint.route('/verifyAll', methods=['POST'])
+@structure_api_blueprint.route('/verifyAllStructure', methods=['POST'])
 def verifyAll():
     projectname = request.form.get('projectname')
     demandList = request.form.get('demandList')

@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 import { reactive, ref, watch, onMounted} from "vue"
-import { getProjectNameApi, getStructureDataApi, verifyStructureDataApi, verifyAllDataApi} from "@/api/structure/index"
-import { type GetStructureRequestData, type VerifyStructureRequestData} from "@/api/structure/types/table"
+import { getProjectNameApi, getCallDataApi, verifyCallDataApi, verifyAllDataApi} from "@/api/call/index"
+import { type GetCallRequestData, type VerifyCallRequestData} from "@/api/call/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { Search, Refresh, CirclePlus, Delete, Download, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
 
 defineOptions({
   // 命名当前组件
-  name: "Structure"
+  name: "Call"
 })
 
 const verificationResult = ref("Hello World!" + '这里是长文本内容\n，如果行数\n增多\n，滚动条\n会自动\n出现。' +
@@ -18,33 +18,33 @@ const loading = ref<boolean>(false)
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
 
 const {
-  paginationData: structurePaginationData,
-  handleCurrentChange: structurehandleCurrentChange,
-  handleSizeChange: structurehandleSizeChange
+  paginationData: callPaginationData,
+  handleCurrentChange: callhandleCurrentChange,
+  handleSizeChange: callhandleSizeChange
 } = usePagination();
 
 //region 增
-const DEFAULT_FORM_DATA: VerifyStructureRequestData = {
+const DEFAULT_FORM_DATA: VerifyCallRequestData = {
   id: "",
-  demandId: "",
-  demandName: "",
-  expectedExpression: ""
+  pathId: "",
+  pathName: "",
+  pathExpression: ""
 }
 const dialogVisible = ref<boolean>(false)
 const formRef = ref<FormInstance | null>(null)
-const formData = ref<VerifyStructureRequestData>(JSON.parse(JSON.stringify(DEFAULT_FORM_DATA)))
+const formData = ref<VerifyCallRequestData>(JSON.parse(JSON.stringify(DEFAULT_FORM_DATA)))
 
 
-const verifyStructure = (row: GetStructureRequestData) => {
+const verifyCall = (row: GetCallRequestData) => {
   if (selectedProject.value.length === 0) {
     return;
   }
   verificationResult.value = '正在生成验证结果，请稍等...'
   formData.value = JSON.parse(JSON.stringify(row))
-  const api = verifyStructureDataApi
+  const api = verifyCallDataApi
   api(formData.value,selectedProject.value)
     .then((data) => {
-      console.log('###### verifyStructure ', data)
+      console.log('###### verifyCall ', data)
       verificationResult.value = data['result'];
     })
     .finally(() => {
@@ -67,32 +67,32 @@ const fetchProjectNames = () =>{
 }
 
 // 获取项目对应的需求列表 仅显示执行流程和方法
-const structureData = ref([])
+const callData = ref([])
 const selectedProject = ref([]);
-const fetchStructureData = async () => {
+const fetchCallData = async () => {
   try {
     if (selectedProject.value.length === 0) {
       return;
     }
-  const data = await getStructureDataApi({
+  const data = await getCallDataApi({
       projectname: selectedProject.value,
-      currentPage: structurePaginationData.currentPage,
-      size: structurePaginationData.size
+      currentPage: callPaginationData.currentPage,
+      size: callPaginationData.size
   });
   console.log(data);
-  var structurelist = [];
+  var calllist = [];
   for (let index = 0; index < data.list.length; index++) {
     const element = data.list[index];
     var tableRow = {
         "id":element['id'],
-        "demandId":element['demandId'],
-        "demandName":element['demandName'],
-        "expectedExpression":element['expectedExpression']
+        "pathId":element['pathId'],
+        "pathName":element['pathName'],
+        "pathExpression":element['pathExpression']
     };
-    structurelist.push(tableRow);
+    calllist.push(tableRow);
   }
-  structurePaginationData.total = data.total;
-  structureData.value = structurelist;
+  callPaginationData.total = data.total;
+  callData.value = calllist;
   } catch (error) {
     console.error('操作失败', error);
   }
@@ -104,9 +104,8 @@ const verifyAll = () => {
     return;
   }
   verificationResult.value = '正在生成验证结果，请稍等...'
-  console.log('期望性质', JSON.stringify(structureData.value))
   const api = verifyAllDataApi
-  api(JSON.stringify(structureData.value), selectedProject.value)
+  api(JSON.stringify(callData.value), selectedProject.value)
     .then((data) => {
       console.log('###### verifyAll ', data)
       verificationResult.value = data['result'];
@@ -118,7 +117,7 @@ const verifyAll = () => {
 
 
 /** 监听分页参数的变化 */
-watch([() => structurePaginationData.currentPage, () => structurePaginationData.pageSize], fetchStructureData, { immediate: false })
+watch([() => callPaginationData.currentPage, () => callPaginationData.pageSize], fetchCallData, { immediate: false })
 
 
 </script>
@@ -127,7 +126,7 @@ watch([() => structurePaginationData.currentPage, () => structurePaginationData.
   <div class="app-container">
     <el-card v-loading="loading" shadow="never" class="search-wrapper">
       <label for="project-select">请选择一个项目：</label>
-      <el-select v-model="selectedProject" placeholder="请选择一个项目" size=“large” style="width: 240px" @change="fetchStructureData" @click="fetchProjectNames">
+      <el-select v-model="selectedProject" placeholder="请选择一个项目" size=“large” style="width: 240px" @change="fetchCallData" @click="fetchProjectNames">
         <el-option
           v-for="name in projectNames"
           :key="name"
@@ -139,18 +138,18 @@ watch([() => structurePaginationData.currentPage, () => structurePaginationData.
     <el-card v-loading="loading" shadow="never">
       <div class="header-with-icon">
         <el-icon class="header-icon"><document /></el-icon>
-        <span>期望性质</span>
+        <span>可达路径</span>
       </div>
       <div class="table-wrapper">
-        <el-table :data="structureData">
+        <el-table :data="callData">
           <el-table-column type="selection" width="50" align="center" />
-          <el-table-column prop="id" label="性质Id" align="center" />
-          <el-table-column prop="demandId" label="需求编号" align="center" />
-          <el-table-column prop="demandName" label="需求名称" align="center" />
-          <el-table-column prop="expectedExpression" label="期望性质表达式" align="center" />
+          <el-table-column prop="id" label="Id" align="center" />
+          <el-table-column prop="pathId" label="路径编号" align="center" />
+          <el-table-column prop="pathName" label="路径名称" align="center" />
+          <el-table-column prop="pathExpression" label="路径表达式" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
-              <el-button type="primary" text bg size="small" @click="verifyStructure(scope.row)">验证</el-button>
+              <el-button type="primary" text bg size="small" @click="verifyCall(scope.row)">验证</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -158,13 +157,13 @@ watch([() => structurePaginationData.currentPage, () => structurePaginationData.
       <div class="pager-wrapper">
         <el-pagination
           background
-          :layout="structurePaginationData.layout"
-          :page-sizes="structurePaginationData.pageSizes"
-          :total="structurePaginationData.total"
-          :page-size="structurePaginationData.pageSize"
-          :currentPage="structurePaginationData.currentPage"
-          @size-change="structurehandleSizeChange"
-          @current-change="structurehandleCurrentChange"
+          :layout="callPaginationData.layout"
+          :page-sizes="callPaginationData.pageSizes"
+          :total="callPaginationData.total"
+          :page-size="callPaginationData.pageSize"
+          :currentPage="callPaginationData.currentPage"
+          @size-change="callhandleSizeChange"
+          @current-change="callhandleCurrentChange"
         />
       </div>
       <div class="header-with-icon">

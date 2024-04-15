@@ -12,11 +12,11 @@ export function getProjectNameApi(){
 }
 
 
-export function getStructureDataApi(paras: Table.GetStructureRequestData){
+export function getSecurityDataApi(paras: Table.GetSecurityRequestData){
   console.log(paras)
   return axios({
     method: 'post',
-    url: `${BASE_URL}/myapi/getStructure`,
+    url: `${BASE_URL}/myapi/getSecurity`,
         data: qs.stringify(paras)
     }).then(function (response) {
         console.log(response);
@@ -27,18 +27,18 @@ export function getStructureDataApi(paras: Table.GetStructureRequestData){
 }
 
 
-export function verifyStructureDataApi(data:Table.VerifyStructureRequestData, projectname:string){
+export function verifySecurityDataApi(data:Table.VerifySecurityRequestData, projectname:string){
   var param = {
     'projectname':projectname,
     'id':data.id,
-    'expectedExpression':data.expectedExpression,
-    'demandId':data.demandId,
-    'demandName':data.demandName
+    'pathExpression':data.pathExpression,
+    'pathId':data.pathId,
+    'pathName':data.pathName
   }
-  console.log("verifyStructureDataApi"+qs.stringify(param))
+  console.log("verifySecurityDataApi"+qs.stringify(param))
   return axios({
     method: 'post',
-    url: `${BASE_URL}/myapi/verifyStructure`,
+    url: `${BASE_URL}/myapi/verifySecurity`,
         data: qs.stringify(param)
     }).then(function (response) {
         console.log(response);
@@ -51,12 +51,12 @@ export function verifyStructureDataApi(data:Table.VerifyStructureRequestData, pr
 export function verifyAllDataApi(data:string, projectname:string){
   var param = {
     'projectname':projectname,
-    'demandList':data
+    'pathList':data
   }
   console.log("verifyAllDataApi     "+qs.stringify(param))
   return axios({
     method: 'post',
-    url: `${BASE_URL}/myapi/verifyAllStructure`,
+    url: `${BASE_URL}/myapi/verifyAllSecurity`,
         data: qs.stringify(param)
     }).then(function (response) {
         console.log(response);
