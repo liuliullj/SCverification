@@ -2,20 +2,20 @@ from flask import Blueprint, jsonify, request
 import pymysql
 import pymysql.cursors
 from datetime import datetime
-
+from db_connect import fetch_all, fetch_one, insert, delete, update
 # 创建一个蓝图对象
 demand_api_blueprint = Blueprint('demand_api', __name__)
 
 # 从原始文件中复制db和cursor的定义到这里，或者使用其他方式导入它们
-db = pymysql.connect(host="127.0.0.1", user="root", password="990326Llj", database="database_learn", port=3306)
-cursor = db.cursor()
+# db = pymysql.connect(host="127.0.0.1", user="root", password="1999511510", database="database_learn", port=3306)
+# cursor = db.cursor()
 
 @demand_api_blueprint.route('/getProjectName', methods=['GET'])
 def getProjectName():
     sql = "SELECT name FROM projectmanagement"
-    cursor.execute(sql)
-    result = cursor.fetchall()
-    names = [row[0] for row in result]
+    print(sql)
+    result = fetch_all(sql, None)
+    names = [row['name'] for row in result]
     print(names)
     return jsonify(names)
 
@@ -28,11 +28,9 @@ def getDemandData():
     projecname = request.form.get('projectname')
     table_name = f"{projecname}Demand"
     fetch_sql = f"SELECT * FROM `{table_name}` LIMIT %s OFFSET %s"
-    cursor.execute(fetch_sql,(size,offset))
-    demands = cursor.fetchall()
+    demands = fetch_all(fetch_sql,(size,offset))
     count_sql = f"SELECT COUNT(*) AS total FROM `{table_name}`"
-    cursor.execute(count_sql)
-    total = cursor.fetchone()[0]
+    total = fetch_one(count_sql, None)['total']
     print(demands)
     return jsonify({"list": demands, "total": total})
 
@@ -46,16 +44,14 @@ def createDemand():
     parentD = request.form.get('parentD')
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     tablename = projectname + "Demand"
-    get_id_sql = f"SELECT Id FROM `{tablename}` ORDER BY Id DESC LIMIT 1"
-    cursor.execute(get_id_sql)
-    row = cursor.fetchone()
-    max_id = row[0] if row else 0
+    get_id_sql = f"SELECT id FROM `{tablename}` ORDER BY id DESC LIMIT 1"
+    row = fetch_one(get_id_sql, None)
+    max_id = row['id'] if row else 0
     id_sql = f"ALTER TABLE `{tablename}` AUTO_INCREMENT = {max_id + 1}"
-    cursor.execute(id_sql)
+    update(id_sql, None)
     insert_sql = f"INSERT INTO `{tablename}` (demandname, category, demanddescription, parentD,creattime) VALUES (%s, %s, %s, %s, %s)"
-    cursor.execute(insert_sql, (demandname, category, demanddescription, parentD, current_time))
-    cursor.connection.commit()
-    print("adddemand!")
+    insert(insert_sql, (demandname, category, demanddescription, parentD, current_time))
+    print("add demand!")
     return jsonify({"message": "需求创建成功"}), 200
 
 
@@ -69,9 +65,8 @@ def updateDemand():
     id = request.form.get('id')
     table_name = projectname+"Demand"
     sql = f"UPDATE `{table_name}` SET `demandname` = '{demandname}', `category` = '{category}', `demanddescription` = '{demanddescription}', `parentD` = {parentD} WHERE `id` = {id};"
-    cursor.execute(sql)
-    cursor.connection.commit()
-    print("updatedemand!")
+    update(sql, None)
+    print("update demand!")
     return jsonify({"message": "需求更新成功"}), 200
 
 
@@ -81,7 +76,6 @@ def deleteDemand():
     id = request.form.get('id')
     table_name = projectname+"Demand"
     sql = f"DELETE FROM `{table_name}` WHERE `id` = {id};"
-    cursor.execute(sql)
-    cursor.connection.commit()
-    print("deletedemand!")
+    delete(sql, None)
+    print("delete demand!")
     return jsonify({"message": "需求删除成功"}), 200

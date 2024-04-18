@@ -1,38 +1,38 @@
 <script lang="ts" setup>
 import { reactive, ref, watch, onMounted} from "vue"
-import { createTableDataApi, deleteTableDataApi, updateTableDataApi, getTableDataApi,getProjectNameApi,getDemandDataApi, CreatDemandDateApi, updateDemandDateApi, deleteDemandDataApi} from "@/api/table"
-import { type CreateOrUpdateTableRequestData, type GetTableData ,type CreateOrUpdateDemandRequestData} from "@/api/table/types/table"
+import { getProjectNameApi,getEntryItemDataApi, CreatEntryItemDataApi, updateEntryItemDataApi, deleteEntryItemDataApi} from "@/api/entryItem/index"
+import { type GetEntryItemRequestData ,type CreateOrUpdateEntryItemRequestData} from "@/api/entryItem/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { Search, Refresh, CirclePlus, Delete, Download, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
 
 defineOptions({
   // 命名当前组件
-  name: "ElementPlus"
+  name: "EntryItem"
 })
 
 const loading = ref<boolean>(false)
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
 
 //region 增
-const DEFAULT_FORM_DATA: CreateOrUpdateDemandRequestData = {
+const DEFAULT_FORM_DATA: CreateOrUpdateEntryItemRequestData = {
   id: undefined,
-  demandname: "",
-  category: "",
-  demanddescription: "",
-  parentD: ""
+  entryItemName: "",
+  entryItemConditions: "",
+  entryItemAgreements: "",
+  demandId: ""
 }
 const dialogVisible = ref<boolean>(false)
 const formRef = ref<FormInstance | null>(null)
-const formData = ref<CreateOrUpdateDemandRequestData>(JSON.parse(JSON.stringify(DEFAULT_FORM_DATA)))
-const formRules: FormRules<CreateOrUpdateDemandRequestData> = {
-  demandname: [{ required: true, trigger: "blur", message: "请输入需求名" }],
-  category: [{ required: true, trigger: "blur", message: "请输入需求类别" }],
-  demanddescription: [{ required: true, trigger: "blur", message: "请输入需求描述" }],
-  parentD: [{ required: true, trigger: "blur", message: "请输入父需求Id" }]
+const formData = ref<CreateOrUpdateEntryItemRequestData>(JSON.parse(JSON.stringify(DEFAULT_FORM_DATA)))
+const formRules: FormRules<CreateOrUpdateEntryItemRequestData> = {
+  entryItemName: [{ required: true, trigger: "blur", message: "请输入合约条目类型名称" }],
+  entryItemConditions: [{ required: true, trigger: "blur", message: "请输入合约条目类型执行条件" }],
+  entryItemAgreements: [{ required: true, trigger: "blur", message: "请输入合约条目类型组成约定" }],
+  demandId: [{ required: true, trigger: "blur", message: "请输入对应需求id" }]
 }
 
-const handleCreateOrUpdateDemand = () => {
+const handleCreateOrUpdateEntryItem = () => {
   formRef.value?.validate((valid: boolean, fields) => {
     if (!valid) return console.error("表单校验不通过", fields)
     if (selectedProject.value.length === 0) {
@@ -40,12 +40,12 @@ const handleCreateOrUpdateDemand = () => {
       return;
     }
     loading.value = true
-    const api = formData.value.id === undefined ? CreatDemandDateApi : updateDemandDateApi
+    const api = formData.value.id === undefined ? CreatEntryItemDataApi : updateEntryItemDataApi
     api(formData.value,selectedProject.value)
       .then(() => {
         ElMessage.success("操作成功")
         dialogVisible.value = false
-        fetchProjectData()
+        fetchEntryItem()
       })
       .finally(() => {
         loading.value = false
@@ -60,14 +60,14 @@ const resetForm = () => {
 
 //region 删
 const handleDelete = (row) => {
-  ElMessageBox.confirm(`正在删除需求：${row.demandname}，确认删除？`, "提示", {
+  ElMessageBox.confirm(`正在删除合约条目类型：${row.entryItemName}，确认删除？`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning"
   }).then(() => {
-    deleteDemandDataApi(row.id,selectedProject.value).then(() => {
+    deleteEntryItemDataApi(row.id,selectedProject.value).then(() => {
       ElMessage.success("删除成功");
-      fetchProjectData();
+      fetchEntryItem();
     }).catch((error) => {
       // 这里处理API调用失败的情况
       ElMessage.error("删除失败：" + error.message);
@@ -80,7 +80,7 @@ const handleDelete = (row) => {
 //#endregion
 
 //region 改
-const handleUpdate = (row: GetTableData) => {
+const handleUpdate = (row: GetEntryItemRequestData) => {
   dialogVisible.value = true
   formData.value = JSON.parse(JSON.stringify(row))
 }
@@ -100,14 +100,14 @@ const fetchProjectNames = () =>{
     })
 }
 
-// 获取项目对应的需求列表
-const demandData = ref([])
+// 获取项目对应的合约条目类型列表
+const entryItemData = ref([])
 const selectedProject = ref([]);
-const fetchProjectData = () =>{
+const fetchEntryItem = () =>{
   if (selectedProject.value.length === 0) {
     return;
   }
-  getDemandDataApi({
+  getEntryItemDataApi({
     projectname: selectedProject.value,
     currentPage: paginationData.currentPage,
     size: paginationData.size
@@ -115,26 +115,26 @@ const fetchProjectData = () =>{
   .then((data) => {
     console.log(data)
     console.log("here")
-    var demandlist = []
+    var entryItemlist = []
     for (let index = 0; index < data.list.length; index++){
       const element = data.list[index];
       var tableRow = {
         "id":element['id'],
-        "demandname":element['demandname'],
-        "category":element['category'],
-        "demanddescription":element['demanddescription'],
-        "parentD":element['parentD'],
+        "entryItemName":element['entryItemName'],
+        "entryItemConditions":element['entryItemConditions'],
+        "entryItemAgreements":element['entryItemAgreements'],
+        "demandId":element['demandId'],
         "creatTime":element['creatTime']
       }
-      demandlist.push(tableRow)
+      entryItemlist.push(tableRow)
     }
     paginationData.total = data.total
-    demandData.value = demandlist
+    entryItemData.value = entryItemlist
     })
 }
 
 /** 监听分页参数的变化 */
-watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchProjectData, { immediate: true })
+watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchEntryItem, { immediate: true })
 
 </script>
 
@@ -142,7 +142,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchPr
   <div class="app-container">
     <el-card v-loading="loading" shadow="never" class="search-wrapper">
       <label for="project-select">请选择一个项目：</label>
-      <el-select v-model="selectedProject" placeholder="请选择一个项目" size=“large” style="width: 240px" @change="fetchProjectData" @click="fetchProjectNames">
+      <el-select v-model="selectedProject" placeholder="请选择一个项目" size=“large” style="width: 240px" @change="fetchEntryItem" @click="fetchProjectNames">
         <el-option
           v-for="name in projectNames"
           :key="name"
@@ -152,48 +152,25 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchPr
       </el-select>
     </el-card>
     <el-card v-loading="loading" shadow="never">
-      <div class="instruction-wrapper" style="margin-bottom: 10px;">
-      <el-card class="box-card">
-        <div slot="header" class="clearfix custom-header">
-          <span>请按照如下智能合约组成结构需求模版录入需求：</span>
-        </div>
-        <pre class="custom-code"><code>
-SmartContract::=ContractItem<sup>+</sup>
-ContractItem::=(Condition<sup>*</sup>,Agreement)<sup>+</sup>
-Agreement::=Workflow<sup>+</sup> | if Condition then Workflow else Workflow
-Workflow::=f<sub>1</sub>([RelevantRole|RelevantGood|RelevantAssets]<sup>+</sup>)
-           f<sub>2</sub>([RelevantRole|RelevantGood|RelevantAssets]<sup>+</sup>)...
-           f<sub>k</sub>([RelevantRole|RelevantGood|RelevantAssets]<sup>+</sup>)...
-RelevantRole::=provider|consumer|trade|...
-RelevantGood::=amount|count|...
-RelevantAssets::=CER|...
-Condition::=[RelevantRole|RelevantGood|RelevantAssets]<sup>+</sup> conditionoperator values
-conditionoperator::=&gt;|&lt;|&ge;|&le;|=|&ne;
-ContractBasedTransaction::=Transaction<sup>+</sup>
-Transaction::=(BlockChain<sub>i</sub>.SmartContract<sub>m</sub>.f<sub>r</sub>),...(BlockChain<sub>j</sub>.SmartContract<sub>n</sub>.f<sub>s</sub>)
-        </code></pre>
-      </el-card>
-      </div>
-
       <div class="toolbar-wrapper">
         <div>
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增需求</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增合约条目类型</el-button>
           <el-button type="danger" :icon="Delete">批量删除</el-button>
         </div>
         <div>
           <el-tooltip content="刷新当前页">
-            <el-button type="primary" :icon="RefreshRight" circle @click="fetchProjectData" />
+            <el-button type="primary" :icon="RefreshRight" circle @click="fetchEntryItem" />
           </el-tooltip>
         </div>
       </div>
       <div class="table-wrapper">
-        <el-table :data="demandData">
+        <el-table :data="entryItemData">
           <el-table-column type="selection" width="50" align="center" />
-          <el-table-column prop="id" label="需求Id" align="center" />
-          <el-table-column prop="demandname" label="需求名称" align="center" />
-          <el-table-column prop="category" label="需求类别" align="center" />
-          <el-table-column prop="demanddescription" label="需求描述" align="center" />
-          <el-table-column prop="parentD" label="父需求" align="center" />
+          <el-table-column prop="id" label="合约条目类型Id" align="center" />
+          <el-table-column prop="entryItemName" label="合约条目类型名称" align="center" />
+          <el-table-column prop="entryItemConditions" label="合约条目类型执行条件" align="center" />
+          <el-table-column prop="entryItemAgreements" label="合约条目类型组成约定" align="center" />
+          <el-table-column prop="demandId" label="对应需求id" align="center" />
           <el-table-column prop="creatTime" label="创建时间" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
@@ -219,35 +196,30 @@ Transaction::=(BlockChain<sub>i</sub>.SmartContract<sub>m</sub>.f<sub>r</sub>),.
     <!-- 新增/修改 -->
     <el-dialog
       v-model="dialogVisible"
-      :title="formData.id === undefined ? '新增需求' : '修改需求'"
+      :title="formData.id === undefined ? '新增合约条目类型' : '修改合约条目类型'"
       @closed="resetForm"
       width="30%"
     >
-      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px" label-position="left">
-        <el-form-item prop="demandname" label="需求名">
-          <el-input v-model="formData.demandname" placeholder="请输入" />
+      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="150px" label-position="left">
+        <el-form-item prop="entryItemName" label="合约条目类型名称">
+          <el-input v-model="formData.entryItemName" placeholder="请输入" />
         </el-form-item>
-        <el-form-item prop="category" label="需求类别">
-          <el-select v-model="formData.category" placeholder="请选择">
-            <el-option label="附加信息" value="附加信息"></el-option>
-            <el-option label="方法" value="方法"></el-option>
-            <el-option label="执行流程" value="执行流程"></el-option>
-            <el-option label="条件语句" value="条件语句"></el-option>
-            <el-option label="约定" value="约定"></el-option>
-            <el-option label="合约" value="合约"></el-option>
-            <el-option label="事物/交易" value="事物/交易"></el-option>
-          </el-select>
+        
+        <el-form-item prop="entryItemConditions" label="合约条目类型执行条件">
+          <el-input v-model="formData.entryItemConditions" placeholder="请输入" />
         </el-form-item>
-        <el-form-item prop="demanddescription" label="需求描述">
-          <el-input v-model="formData.demanddescription" placeholder="请输入" />
+
+        <el-form-item prop="entryItemAgreements" label="合约条目类型组成约定">
+          <el-input v-model="formData.entryItemAgreements" placeholder="请输入" />
         </el-form-item>
-        <el-form-item prop="parentD" label="父需求Id">
-          <el-input v-model="formData.parentD" placeholder="请输入" />
+
+        <el-form-item prop="demandId" label="对应需求id">
+          <el-input v-model="formData.demandId" placeholder="请输入" />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleCreateOrUpdateDemand" :loading="loading">确认</el-button>
+        <el-button type="primary" @click="handleCreateOrUpdateEntryItem" :loading="loading">确认</el-button>
       </template>
     </el-dialog>
   </div>

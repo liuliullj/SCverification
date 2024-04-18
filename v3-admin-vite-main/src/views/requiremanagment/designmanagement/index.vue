@@ -90,47 +90,6 @@ const handleUpdate = (row: GetTableData) => {
 }
 //endregion
 
-//region 查
-const tableData = ref<GetTableData[]>([])
-const searchFormRef = ref<FormInstance | null>(null)
-const searchData = reactive({
-  name: "",
-  description: ""
-})
-const getTableData = () => {
-  loading.value = true
-  getTableDataApi({
-    currentPage: demandPaginationData.currentPage,
-    size: demandPaginationData.pageSize,
-    name: searchData.name || undefined,
-    description: searchData.description || undefined
-  })
-    .then((data) => {
-      var tableDataList = []
-      for (let index = 0; index < data.list.length; index++) {
-        const element = data.list[index];
-        var tableRow = {
-          "id": element[0],
-          "name": element[1],
-          "description": element[2],
-          "createTime": element[3]
-        }
-        tableDataList.push(tableRow)
-      }
-      demandPaginationData.total = data.total
-      tableData.value = tableDataList
-    })
-    .catch(() => {
-      tableData.value = []
-    })
-    .finally(() => {
-      loading.value = false
-    })
-}
-//endregion
-
-
-
 
 /** 获取项目名称列表*/
 onMounted(() => {
@@ -149,7 +108,9 @@ const fetchProjectNames = () =>{
 const demandData = ref([])
 const selectedProject = ref([]);
 const fetchProjectData = async () =>{
-
+  if (selectedProject.value.length === 0) {
+    return;
+  }
   const data = await getDesignDataApi({
       projectname: selectedProject.value,
       currentPage: demandPaginationData.currentPage,
@@ -160,12 +121,12 @@ const fetchProjectData = async () =>{
   for (let index = 0; index < data.list.length; index++) {
     const element = data.list[index];
     var tableRow = {
-        "id":element[0],
-        "demandname":element[1],
-        "category":element[2],
-        "demanddescription":element[3],
-        "parentD":element[4],
-        "creattime":element[5]
+        "id":element['id'],
+        "demandname":element['demandname'],
+        "category":element['category'],
+        "demanddescription":element['demanddescription'],
+        "parentD":element['parentD'],
+        "creatTime":element['creatTime']
     };
     demandlist.push(tableRow);
   }
@@ -189,7 +150,7 @@ const fetchProjectData = async () =>{
   //       "category":element[2],
   //       "demanddescription":element[3],
   //       "parentD":element[4],
-  //       "creattime":element[5]
+  //       "creatTime":element[5]
   //     }
   //     demandlist.push(tableRow)
   //   }
@@ -206,6 +167,9 @@ const fetchProjectData = async () =>{
 //获取项目对应的设计路径列表
 const designData = ref([])
 const fetchPathData = async () =>{
+  if (selectedProject.value.length === 0) {
+    return;
+  }
   const data = await getPathDataApi({
       projectname: selectedProject.value,
       currentPage: designPaginationData.currentPage,
@@ -216,10 +180,10 @@ const fetchPathData = async () =>{
   for(let index = 0; index < data.list.length; index++){
     const element = data.list[index];
     var tableRow = {
-      'id': element[0],
-      'pathname':element[1],
-      'expression':element[2],
-      'creattime':element[3]
+      'id': element['id'],
+      'pathname':element['pathname'],
+      'expression':element['expression'],
+      'creatTime':element['creatTime']
     }
     designlist.push(tableRow)
   }
@@ -240,7 +204,7 @@ const fetchPathData = async () =>{
   //       'id': element[0],
   //       'pathname':element[1],
   //       'expression':element[2],
-  //       'creattime':element[3]
+  //       'creatTime':element[3]
   //     }
   //     designlist.push(tableRow)
   //   }
@@ -270,7 +234,7 @@ const handleChange = async () => {
   <div class="app-container">
     <el-card v-loading="loading" shadow="never" class="search-wrapper">
       <label for="project-select">请选择一个项目：</label>
-      <el-select v-model="selectedProject" placeholder="请选择一个项目" size=“large” style="width: 240px" @change="handleChange">
+      <el-select v-model="selectedProject" placeholder="请选择一个项目" size=“large” style="width: 240px" @change="handleChange" @click="fetchProjectNames">
         <el-option
           v-for="name in projectNames"
           :key="name"
@@ -332,7 +296,7 @@ const handleChange = async () => {
           <el-table-column prop="id" label="路径Id" align="center" />
           <el-table-column prop="pathname" label="路径名称" align="center" />
           <el-table-column prop="expression" label="路径表达式" align="center" />
-          <el-table-column prop="creattime" label="创建时间" align="center" />
+          <el-table-column prop="creatTime" label="创建时间" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
               <el-button type="primary" text bg size="small" @click="handleUpdate(scope.row)">修改</el-button>

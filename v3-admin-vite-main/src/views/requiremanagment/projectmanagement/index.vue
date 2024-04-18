@@ -91,10 +91,10 @@ const getTableData = () => {
       for (let index = 0; index < data.list.length; index++) {
         const element = data.list[index];
         var tableRow = {
-          "id": element[0],
-          "name": element[1],
-          "description": element[2],
-          "createTime": element[3]
+          "id": element['Id'],
+          "name": element['name'],
+          "description": element['description'],
+          "creatTime": element['creatTime']
         }
         tableDataList.push(tableRow)
       }
@@ -152,7 +152,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
           <el-table-column prop="id" label="项目Id" align="center" />
           <el-table-column prop="name" label="项目名" align="center" />
           <el-table-column prop="description" label="项目描述" align="center" />
-          <el-table-column prop="createTime" label="创建时间" align="center" />
+          <el-table-column prop="creatTime" label="创建时间" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
               <el-button type="primary" text bg size="small" @click="handleUpdate(scope.row)">修改</el-button>
