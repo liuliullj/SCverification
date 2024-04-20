@@ -24,7 +24,7 @@ class Config(object):
         host='127.0.0.1',
         port=3306,
         user='root',
-        password='1999511510',
+        password='990326Llj',
         database='database_learn',
         charset='utf8'
     )

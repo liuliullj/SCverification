@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive, ref, watch, onMounted} from "vue"
+import { reactive, ref, watch, onMounted, computed} from "vue"
 import { createTableDataApi, deleteTableDataApi, updateTableDataApi, getTableDataApi,getProjectNameApi,getDemandDataApi, CreatDemandDateApi, updateDemandDateApi, deleteDemandDataApi} from "@/api/table"
 import { type CreateOrUpdateTableRequestData, type GetTableData ,type CreateOrUpdateDemandRequestData} from "@/api/table/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
@@ -136,6 +136,18 @@ const fetchProjectData = () =>{
 /** 监听分页参数的变化 */
 watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchProjectData, { immediate: true })
 
+const categoryString = computed({
+  get: () => formData.value.category,
+  set: (value) => {
+    if (Array.isArray(value)) {
+      // 如果 value 是数组，取最后一个元素作为 category 值
+      formData.value.category = value[value.length - 1] || "";
+    } else {
+      formData.value.category = value;
+    }
+  }
+});
+
 </script>
 
 <template>
@@ -228,15 +240,28 @@ Transaction::=(BlockChain<sub>i</sub>.SmartContract<sub>m</sub>.f<sub>r</sub>),.
           <el-input v-model="formData.demandname" placeholder="请输入" />
         </el-form-item>
         <el-form-item prop="category" label="需求类别">
-          <el-select v-model="formData.category" placeholder="请选择">
-            <el-option label="附加信息" value="附加信息"></el-option>
-            <el-option label="方法" value="方法"></el-option>
-            <el-option label="执行流程" value="执行流程"></el-option>
-            <el-option label="条件语句" value="条件语句"></el-option>
-            <el-option label="约定" value="约定"></el-option>
-            <el-option label="合约" value="合约"></el-option>
-            <el-option label="事物/交易" value="事物/交易"></el-option>
-          </el-select>
+          <el-cascader
+            v-model="categoryString"
+            :options="[
+              {
+                value: '附加信息',
+                label: '附加信息',
+                children: [
+                  { value: '合约参与方', label: '合约参与方' },
+                  { value: '相关物品', label: '相关物品' },
+                  { value: '相关资产', label: '相关资产' }
+                ]
+              },
+              { value: '方法', label: '方法' },
+              { value: '功能', label: '功能' },
+              { value: '执行流程', label: '执行流程' },
+              { value: '业务', label: '业务' },
+              { value: '智能合约', label: '智能合约' }
+            ]"
+            placeholder="请选择"
+            clearable
+            style="width: 100%;"
+          ></el-cascader>
         </el-form-item>
         <el-form-item prop="demanddescription" label="需求描述">
           <el-input v-model="formData.demanddescription" placeholder="请输入" />
