@@ -61,22 +61,22 @@ export const constantRoutes: RouteRecordRaw[] = [
       }
     ]
   },
-  {
-    path: "/unocss",
-    component: Layouts,
-    redirect: "/unocss/index",
-    children: [
-      {
-        path: "index",
-        component: () => import("@/views/unocss/index.vue"),
-        name: "UnoCSS",
-        meta: {
-          title: "UnoCSS",
-          svgIcon: "unocss"
-        }
-      }
-    ]
-  },
+  // {
+  //   path: "/unocss",
+  //   component: Layouts,
+  //   redirect: "/unocss/index",
+  //   children: [
+  //     {
+  //       path: "index",
+  //       component: () => import("@/views/unocss/index.vue"),
+  //       name: "UnoCSS",
+  //       meta: {
+  //         title: "UnoCSS",
+  //         svgIcon: "unocss"
+  //       }
+  //     }
+  //   ]
+  // },
   {
     path:"/require",
     component: Layouts,
@@ -116,31 +116,31 @@ export const constantRoutes: RouteRecordRaw[] = [
       }
     ]
   },
-  {
-    path: "/link",
-    meta: {
-      title: "智能合约需求管理",
-      svgIcon: "link"
-    },
-    children: [
-      {
-        path: "https://juejin.cn/post/7089377403717287972",
-        component: () => {},
-        name: "Link1",
-        meta: {
-          title: "中文文档"
-        }
-      },
-      {
-        path: "https://juejin.cn/column/7207659644487139387",
-        component: () => {},
-        name: "Link2",
-        meta: {
-          title: "新手教程"
-        }
-      }
-    ]
-  },
+  // {
+  //   path: "/link",
+  //   meta: {
+  //     title: "智能合约需求管理",
+  //     svgIcon: "link"
+  //   },
+  //   children: [
+  //     {
+  //       path: "https://juejin.cn/post/7089377403717287972",
+  //       component: () => {},
+  //       name: "Link1",
+  //       meta: {
+  //         title: "中文文档"
+  //       }
+  //     },
+  //     {
+  //       path: "https://juejin.cn/column/7207659644487139387",
+  //       component: () => {},
+  //       name: "Link2",
+  //       meta: {
+  //         title: "新手教程"
+  //       }
+  //     }
+  //   ]
+  // },
   {
     path: "/model",
     component: Layouts,
