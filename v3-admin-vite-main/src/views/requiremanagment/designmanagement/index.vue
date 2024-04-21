@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive, ref, watch, onMounted} from "vue"
+import { reactive, ref, watch, onMounted, computed} from "vue"
 import { createTableDataApi, deleteTableDataApi, updateTableDataApi, getTableDataApi,getProjectNameApi,getDemandDataApi, CreatDemandDateApi, updateDemandDateApi, deleteDemandDataApi, getDesignDataApi, getPathDataApi, CreatDesignDateApi, updateDesignDateApi, deleteDesignDataApi} from "@/api/table"
 import { type CreateOrUpdateTableRequestData, type GetTableData ,type CreateOrUpdateDemandRequestData, type CreateOrUpdateDesignRequestData} from "@/api/table/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
@@ -12,6 +12,7 @@ defineOptions({
 })
 
 const loading = ref<boolean>(false)
+const loadingNode = ref<boolean>(false)
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
 
 const {
@@ -32,15 +33,32 @@ const DEFAULT_FORM_DATA: CreateOrUpdateDesignRequestData = {
   pathname: "",
   expression: ""
 }
-const dialogVisible = ref<boolean>(false)
+
+const NODE_FORM_DATA: CreateOrUpdateDemandRequestData = {
+  id: undefined,
+  demandname: "",
+  category: "",
+  demanddescription: "",
+  parentD: ""
+}
+const dialogVisiblePath = ref<boolean>(false)
+const dialogVisibleNode = ref<boolean>(false)
 const formRef = ref<FormInstance | null>(null)
+const formRefNode = ref<FormInstance | null>(null)
 const formData = ref<CreateOrUpdateDesignRequestData>(JSON.parse(JSON.stringify(DEFAULT_FORM_DATA)))
+const nodeData = ref<CreateOrUpdateDemandRequestData>(JSON.parse(JSON.stringify(NODE_FORM_DATA)))
 const formRules: FormRules<CreateOrUpdateDesignRequestData> = {
   pathname: [{ required: true, trigger: "blur", message: "请输入路径名" }],
   expression: [{ required: true, trigger: "blur", message: "请输入路径表达式" }],
 }
+const formRulesNode: FormRules<CreateOrUpdateDemandRequestData> = {
+  demandname: [{ required: true, trigger: "blur", message: "请输入需求名" }],
+  category: [{ required: true, trigger: "blur", message: "请输入需求类别" }],
+  demanddescription: [{ required: true, trigger: "blur", message: "请输入需求描述" }],
+  parentD: [{ required: true, trigger: "blur", message: "请输入父需求Id" }]
+}
 
-const handleCreateOrUpdateDemand = () => {
+const handleCreateOrUpdatePath = () => {
   formRef.value?.validate((valid: boolean, fields) => {
     if (!valid) return console.error("表单校验不通过", fields)
     loading.value = true
@@ -48,7 +66,7 @@ const handleCreateOrUpdateDemand = () => {
     api(formData.value,selectedProject.value)
       .then(() => {
         ElMessage.success("操作成功")
-        dialogVisible.value = false
+        dialogVisiblePath.value = false
         fetchPathData()
       })
       .finally(() => {
@@ -56,14 +74,37 @@ const handleCreateOrUpdateDemand = () => {
       })
   })
 }
+
+const handleCreateOrUpdateNode = () => {
+  formRefNode.value?.validate((valid: boolean, fields) => {
+    if (!valid) return console.error("表单校验不通过", fields)
+    loadingNode.value = true
+    const api = nodeData.value.id === undefined ? CreatDemandDateApi : updateDemandDateApi
+    api(nodeData.value,selectedProject.value)
+      .then(() => {
+        ElMessage.success("操作成功")
+        dialogVisibleNode.value = false
+        fetchProjectData()
+      })
+      .finally(() => {
+        loadingNode.value = false
+      })
+  })
+}
+
 const resetForm = () => {
   formRef.value?.clearValidate()
   formData.value = JSON.parse(JSON.stringify(DEFAULT_FORM_DATA))
 }
+
+const resetFormNode = () => {
+  formRefNode.value?.clearValidate()
+  nodeData.value = JSON.parse(JSON.stringify(NODE_FORM_DATA))
+}
 //endregion
 
 //region 删
-const handleDelete = (row) => {
+const handleDeletePath = (row) => {
   ElMessageBox.confirm(`正在删除路径：${row.pathname}，确认删除？`, "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
@@ -81,12 +122,36 @@ const handleDelete = (row) => {
     console.log("取消删除");
   });
 };
-//#endregion
+
+//region 删
+const handleDeleteNode = (row) => {
+  ElMessageBox.confirm(`正在删除节点：${row.pathname}，确认删除？`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning"
+  }).then(() => {
+    deleteDemandDataApi(row.id,selectedProject.value).then(() => {
+      ElMessage.success("删除成功");
+      fetchProjectData();
+    }).catch((error) => {
+      // 这里处理API调用失败的情况
+      ElMessage.error("删除失败：" + error.message);
+    });
+  }).catch(() => {
+    // 这里处理取消操作的情况
+    console.log("取消删除");
+  });
+};
 
 //region 改
-const handleUpdate = (row: GetTableData) => {
-  dialogVisible.value = true
+const handleUpdatePath = (row: GetTableData) => {
+  dialogVisiblePath.value = true
   formData.value = JSON.parse(JSON.stringify(row))
+}
+
+const handleUpdateNode = (row: GetTableData) => {
+  dialogVisibleNode.value = true
+  nodeData.value = JSON.parse(JSON.stringify(row))
 }
 //endregion
 
@@ -217,6 +282,18 @@ const fetchPathData = async () =>{
 watch([() => demandPaginationData.currentPage, () => demandPaginationData.pageSize], fetchProjectData, { immediate: false })
 watch([() => designPaginationData.currentPage, () => designPaginationData.pageSize], fetchPathData, { immediate: false })
 
+const categoryString = computed({
+  get: () => nodeData.value.category,
+  set: (value) => {
+    if (Array.isArray(value)) {
+      // 如果 value 是数组，取最后一个元素作为 category 值
+      nodeData.value.category = value[value.length - 1] || "";
+    } else {
+      nodeData.value.category = value;
+    }
+  }
+});
+
 const handleChange = async () => {
   try {
     // 等待第一个fetch操作完成
@@ -249,7 +326,7 @@ const handleChange = async () => {
         <span>可达路径节点设计</span>
       </div>
       <div style="margin-bottom: 20px;">
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增节点</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="dialogVisibleNode = true">新增节点</el-button>
       </div>
       <div class="table-wrapper">
         <el-table :data="demandData">
@@ -261,8 +338,8 @@ const handleChange = async () => {
           <el-table-column prop="parentD" label="父需求" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
-              <el-button type="primary" text bg size="small" @click="handleUpdate(scope.row)">修改</el-button>
-              <el-button type="danger" text bg size="small" @click="handleDelete(scope.row)">删除</el-button>
+              <el-button type="primary" text bg size="small" @click="handleUpdateNode(scope.row)">修改</el-button>
+              <el-button type="danger" text bg size="small" @click="handleDeleteNode(scope.row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -290,7 +367,7 @@ const handleChange = async () => {
       </div>
       <div class="toolbar-wrapper">
         <div>
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增路径</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="dialogVisiblePath = true">新增路径</el-button>
           <el-button type="danger" :icon="Delete">批量删除</el-button>
         </div>
         <div>
@@ -308,8 +385,8 @@ const handleChange = async () => {
           <el-table-column prop="creatTime" label="创建时间" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
-              <el-button type="primary" text bg size="small" @click="handleUpdate(scope.row)">修改</el-button>
-              <el-button type="danger" text bg size="small" @click="handleDelete(scope.row)">删除</el-button>
+              <el-button type="primary" text bg size="small" @click="handleUpdatePath(scope.row)">修改</el-button>
+              <el-button type="danger" text bg size="small" @click="handleDeletePath(scope.row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -327,7 +404,7 @@ const handleChange = async () => {
         />
       </div>
       <el-dialog
-      v-model="dialogVisible"
+      v-model="dialogVisiblePath"
       :title="formData.id === undefined ? '新增路径' : '修改路径'"
       @closed="resetForm"
       width="30%"
@@ -341,8 +418,50 @@ const handleChange = async () => {
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleCreateOrUpdateDemand" :loading="loading">确认</el-button>
+        <el-button @click="dialogVisiblePath = false">取消</el-button>
+        <el-button type="primary" @click="handleCreateOrUpdatePath" :loading="loading">确认</el-button>
+      </template>
+      </el-dialog>
+      <el-dialog
+      v-model="dialogVisibleNode"
+      :title="nodeData.id === undefined ? '新增节点' : '修改节点'"
+      @closed="resetFormNode"
+      width="30%"
+    >
+      <el-form ref="formRefNode" :model="nodeData" :rules="formRulesNode" label-width="100px" label-position="left">
+        <el-form-item prop="demandname" label="需求名">
+          <el-input v-model="nodeData.demandname" placeholder="请输入" />
+        </el-form-item>
+        <el-form-item prop="category" label="需求类别">
+          <el-cascader
+            v-model="categoryString"
+            :options="[
+              {
+                value: '附加信息',
+                label: '附加信息',
+                children: [
+                  { value: '合约参与方', label: '合约参与方' },
+                  { value: '相关物品', label: '相关物品' },
+                  { value: '相关资产', label: '相关资产' }
+                ]
+              },
+              { value: '方法', label: '方法' }
+            ]"
+            placeholder="请选择"
+            clearable
+            style="width: 100%;"
+          ></el-cascader>
+        </el-form-item>
+        <el-form-item prop="demanddescription" label="需求描述">
+          <el-input v-model="nodeData.demanddescription" placeholder="请输入" />
+        </el-form-item>
+        <el-form-item prop="parentD" label="父需求Id">
+          <el-input v-model="nodeData.parentD" placeholder="请输入" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisibleNode = false">取消</el-button>
+        <el-button type="primary" @click="handleCreateOrUpdateNode" :loading="loadingNode">确认</el-button>
       </template>
       </el-dialog>
     </el-card>
