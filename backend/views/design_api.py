@@ -21,7 +21,7 @@ def getDesignData():
     projecname = request.form.get('projectname')
     table_name = f"{projecname}Demand"
 
-    category_filter = "category='执行流程' OR category='方法'"
+    category_filter = "category='功能' OR category='方法'"
     print("get design+"+table_name)
     fetch_sql = f"SELECT * FROM `{table_name}` WHERE {category_filter} LIMIT %s OFFSET %s"
     demands = fetch_all(fetch_sql, (size,offset))

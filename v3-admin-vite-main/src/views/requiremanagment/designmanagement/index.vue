@@ -246,16 +246,25 @@ const handleChange = async () => {
     <el-card v-loading="loading" shadow="never">
       <div class="header-with-icon">
         <el-icon class="header-icon"><document /></el-icon>
-        <span>需求中的执行流程及方法（可达路径节点）</span>
+        <span>可达路径节点设计</span>
+      </div>
+      <div style="margin-bottom: 20px;">
+          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增节点</el-button>
       </div>
       <div class="table-wrapper">
         <el-table :data="demandData">
           <el-table-column type="selection" width="50" align="center" />
-          <el-table-column prop="id" label="需求Id" align="center" />
-          <el-table-column prop="demandname" label="需求名称" align="center" />
+          <el-table-column prop="id" label="需求Id" width="100" align="center" />
+          <el-table-column prop="demandname" label="需求名称" width="200" align="center" />
           <el-table-column prop="category" label="需求类别" align="center" />
           <el-table-column prop="demanddescription" label="需求描述" align="center" />
           <el-table-column prop="parentD" label="父需求" align="center" />
+          <el-table-column fixed="right" label="操作" width="150" align="center">
+            <template #default="scope">
+              <el-button type="primary" text bg size="small" @click="handleUpdate(scope.row)">修改</el-button>
+              <el-button type="danger" text bg size="small" @click="handleDelete(scope.row)">删除</el-button>
+            </template>
+          </el-table-column>
         </el-table>
       </div>
       <div class="pager-wrapper">
@@ -293,8 +302,8 @@ const handleChange = async () => {
       <div class="table-wrapper">
         <el-table :data="designData">
           <el-table-column type="selection" width="50" align="center" />
-          <el-table-column prop="id" label="路径Id" align="center" />
-          <el-table-column prop="pathname" label="路径名称" align="center" />
+          <el-table-column prop="id" label="路径Id" width="100" align="center" />
+          <el-table-column prop="pathname" label="路径名称" width="200" align="center" />
           <el-table-column prop="expression" label="路径表达式" align="center" />
           <el-table-column prop="creatTime" label="创建时间" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
