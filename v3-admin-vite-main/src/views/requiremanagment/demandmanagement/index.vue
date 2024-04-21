@@ -243,16 +243,6 @@ Transaction::=(BlockChain<sub>i</sub>.SmartContract<sub>m</sub>.f<sub>r</sub>),.
           <el-cascader
             v-model="categoryString"
             :options="[
-              {
-                value: '附加信息',
-                label: '附加信息',
-                children: [
-                  { value: '合约参与方', label: '合约参与方' },
-                  { value: '相关物品', label: '相关物品' },
-                  { value: '相关资产', label: '相关资产' }
-                ]
-              },
-              { value: '方法', label: '方法' },
               { value: '功能', label: '功能' },
               { value: '执行流程', label: '执行流程' },
               { value: '业务', label: '业务' },

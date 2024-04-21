@@ -27,7 +27,8 @@ def getDemandData():
     offset = (page - 1) * size
     projecname = request.form.get('projectname')
     table_name = f"{projecname}Demand"
-    fetch_sql = f"SELECT * FROM `{table_name}` LIMIT %s OFFSET %s"
+    category_filter = "category='功能' OR category='执行流程' OR category='业务' OR category='智能合约' "
+    fetch_sql = f"SELECT * FROM `{table_name}` WHERE {category_filter} LIMIT %s OFFSET %s"
     demands = fetch_all(fetch_sql,(size,offset))
     count_sql = f"SELECT COUNT(*) AS total FROM `{table_name}`"
     total = fetch_one(count_sql, None)['total']
