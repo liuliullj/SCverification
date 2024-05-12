@@ -11,7 +11,11 @@ structure_api_blueprint = Blueprint('structure_api', __name__)
 
 
 def getExpectedExpression(demand):
-    return 'expression'
+    demandId = demand['id']
+    demandName = demand['demandname']
+    parentD = demand['parentD']
+    expression = "(%s,%s,AggregationRelation)" % (demandId, parentD)
+    return expression
 
 
 def getVerificationResult(projectname, demandId, demandName, expectedExpression):
@@ -35,7 +39,7 @@ def getStructureData():
     projecname = request.form.get('projectname')
     table_name = f"{projecname}Demand"
 
-    category_filter = "category!='附加信息'"
+    category_filter = "category='功能' OR category='执行流程' OR category='业务' OR category='智能合约' "
     fetch_sql = f"SELECT * FROM `{table_name}` WHERE {category_filter} LIMIT %s OFFSET %s"
     demands = fetch_all(fetch_sql, (size, offset))
     result = []
@@ -47,7 +51,10 @@ def getStructureData():
         result.append({'id': index, 'demandId': demandId, 'demandName': demandName, 'expectedExpression': expectedExpression})
         index = index + 1
     print('get structure', result)
-    return jsonify({"list": result, "total": len(result)})
+    count_sql = f"SELECT COUNT(*) AS total FROM `{table_name}` WHERE {category_filter}"
+    total = fetch_one(count_sql, None)['total']
+
+    return jsonify({"list": result, "total": total})
 
 
 @structure_api_blueprint.route('/verifyStructure', methods=['POST'])

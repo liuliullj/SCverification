@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive, ref, watch, onMounted} from "vue"
+import { reactive, ref, watch, onMounted, computed} from "vue"
 import { getProjectNameApi, getStructureDataApi, verifyStructureDataApi, verifyAllDataApi} from "@/api/structure/index"
 import { type GetStructureRequestData, type VerifyStructureRequestData} from "@/api/structure/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
@@ -121,6 +121,48 @@ const verifyAll = () => {
 watch([() => structurePaginationData.currentPage, () => structurePaginationData.pageSize], fetchStructureData, { immediate: false })
 
 
+//判断是否需要合并属性
+
+const extractPid = (expression) =>{
+  const match = expression.match(/^\((\d+),\s*(\d+),\s*(\w+)\)$/);
+  return match ? match[2] : null;  // 返回 pid 部分
+};
+
+// 计算每个pid的行索引和计数
+const pidRows = computed(() => {
+  const pidMap = {};
+  structureData.value.forEach((row, index) => {
+    const pid = extractPid(row.expectedExpression);
+    if (pid) {
+      if (!pidMap.hasOwnProperty(pid)) {
+        pidMap[pid] = { startIndex: index, count: 1 }; // 初始化时直接设置count为1
+      } else {
+        pidMap[pid].count++;  // 仅在已存在时递增
+      }
+    }
+  });
+  return pidMap;
+});
+
+const spanMethod = ({ row, column, rowIndex, columnIndex }) => {
+  const pid = extractPid(row.expectedExpression);
+  console.log("spanMethod called");
+  console.log(`Processing row ${rowIndex}, column ${columnIndex} (${column.property}), PID: ${pid}`);
+
+  // 合并目标列的索引可能需要调整，这里用列名称代替固定索引
+  const columnsToMerge = ['demandId', 'demandName', '操作'];
+  if (columnsToMerge.includes(column.property)) {
+    const pidInfo = pidRows.value[pid];
+    if (pidInfo && pidInfo.startIndex === rowIndex) {
+      console.log(`Merging ${pidInfo.count} rows starting from row ${rowIndex} for column ${column.property}`);
+      return pidInfo.count;
+    } else {
+      return 0;
+    }
+  }
+  return 1;
+};
+
 </script>
 
 <template>
@@ -142,7 +184,7 @@ watch([() => structurePaginationData.currentPage, () => structurePaginationData.
         <span>期望性质</span>
       </div>
       <div class="table-wrapper">
-        <el-table :data="structureData">
+        <el-table :data="structureData" :span-method="spanMethod">
           <el-table-column type="selection" width="50" align="center" />
           <el-table-column prop="id" label="性质Id" align="center" />
           <el-table-column prop="demandId" label="需求编号" align="center" />
