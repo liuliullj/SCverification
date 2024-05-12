@@ -3,8 +3,10 @@ import pymysql
 import pymysql.cursors
 from datetime import datetime
 from db_connect import fetch_all, fetch_one, insert, delete, update
+
 # 创建一个蓝图对象
 mapping_api_blueprint = Blueprint('mapping_api', __name__)
+
 
 @mapping_api_blueprint.route('/getMapping', methods=['POST'])
 def getMappingData():
@@ -15,11 +17,21 @@ def getMappingData():
     projecname = request.form.get('projectname')
     table_name = f"{projecname}Mapping"
     fetch_sql = f"SELECT * FROM `{table_name}` LIMIT %s OFFSET %s"
-    mappings = fetch_all(fetch_sql,(size,offset))
+    mappings = fetch_all(fetch_sql, (size, offset))
     count_sql = f"SELECT COUNT(*) AS total FROM `{table_name}`"
     total = fetch_one(count_sql, None)['total']
     print(mappings)
     return jsonify({"list": mappings, "total": total})
+
+
+@mapping_api_blueprint.route('/getBasicDataInput', methods=['POST'])
+def getBasicDataInput():
+    projecname = request.form.get('projectname')
+    table_name = f"{projecname}BasicData"
+    fetch_sql = f"SELECT basicDataName as name FROM `{table_name}`"
+    basicDataInputs = fetch_all(fetch_sql, ())
+    print(basicDataInputs)
+    return jsonify({"list": basicDataInputs})
 
 
 @mapping_api_blueprint.route('/createMapping', methods=['POST'])
@@ -50,7 +62,7 @@ def updateMapping():
     mappingOutputBasicData = request.form.get('mappingOutputBasicData')
     demandId = request.form.get('demandId')
     id = request.form.get('id')
-    table_name = projectname+"Mapping"
+    table_name = projectname + "Mapping"
     sql = f"UPDATE `{table_name}` SET `mappingName` = '{mappingName}', `mappingInputBasicData` = '{mappingInputBasicData}', `mappingOutputBasicData` = '{mappingOutputBasicData}', `demandId` = '{demandId}' WHERE `id` = {id};"
     update(sql, None)
     print("update mapping!")
@@ -61,7 +73,7 @@ def updateMapping():
 def deleteMapping():
     projectname = request.form.get('projectname')
     id = request.form.get('id')
-    table_name = projectname+"Mapping"
+    table_name = projectname + "Mapping"
     sql = f"DELETE FROM `{table_name}` WHERE `id` = {id};"
     delete(sql, None)
     print("delete mapping!")

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { reactive, ref, watch, onMounted} from "vue"
-import { getProjectNameApi,getAgreementDataApi, CreatAgreementDataApi, updateAgreementDataApi, deleteAgreementDataApi} from "@/api/agreement/index"
+import { getProjectNameApi,getAgreementDataApi, CreatAgreementDataApi, updateAgreementDataApi, deleteAgreementDataApi, getAgreementInterfaceApi} from "@/api/agreement/index"
 import { type GetAgreementRequestData ,type CreateOrUpdateAgreementRequestData} from "@/api/agreement/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { Search, Refresh, CirclePlus, Delete, Download, RefreshRight } from "@element-plus/icons-vue"
@@ -38,6 +38,7 @@ const handleCreateOrUpdateAgreement = () => {
       return;
     }
     loading.value = true
+    formData.value.agreementInterfaces = formData.value.agreementInterfaces.join(';')
     const api = formData.value.id === undefined ? CreatAgreementDataApi : updateAgreementDataApi
     api(formData.value,selectedProject.value)
       .then(() => {
@@ -78,11 +79,46 @@ const handleDelete = (row) => {
 //#endregion
 
 //region 改
+const interfaceOptions = ref([])
+//region 改
 const handleUpdate = (row: GetAgreementRequestData) => {
+  getAgreementInterfaceApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var dataList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      dataList.push(item)
+    }
+    interfaceOptions.value = dataList
+  })
+  
   dialogVisible.value = true
-  formData.value = JSON.parse(JSON.stringify(row))
+  var interfaceData = JSON.parse(JSON.stringify(row))
+  interfaceData['agreementInterfaces'] = interfaceData['agreementInterfaces'].split(';')
+  formData.value = interfaceData
 }
 
+
+const handleInsertClick = () => {
+  getAgreementInterfaceApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var dataList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      dataList.push(item)
+    }
+    interfaceOptions.value = dataList
+  })
+  dialogVisible.value = true
+}
 
 
 
@@ -152,7 +188,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchAg
     <el-card v-loading="loading" shadow="never">
       <div class="toolbar-wrapper">
         <div>
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增合约约定类型</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="handleInsertClick">新增合约约定类型</el-button>
           <el-button type="danger" :icon="Delete">批量删除</el-button>
         </div>
         <div>
@@ -203,7 +239,14 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchAg
         </el-form-item>
         
         <el-form-item prop="agreementInterfaces" label="合约约定类型组成接口">
-          <el-input v-model="formData.agreementInterfaces" placeholder="请输入" />
+          <el-select v-model="formData.agreementInterfaces" multiple placeholder="请选择"  style="width:100%">
+            <el-option 
+              v-for="item in interfaceOptions" 
+              :key="item.name" 
+              :label="item.name" 
+              :value="item.name" 
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item prop="demandId" label="对应需求id">

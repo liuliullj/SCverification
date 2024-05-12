@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { reactive, ref, watch, onMounted} from "vue"
-import { getProjectNameApi,getEntryItemDataApi, CreatEntryItemDataApi, updateEntryItemDataApi, deleteEntryItemDataApi} from "@/api/entryItem/index"
+import { getProjectNameApi,getEntryItemDataApi, CreatEntryItemDataApi, updateEntryItemDataApi, deleteEntryItemDataApi, getEntryItemConditionApi, getEntryItemAgreementApi} from "@/api/entryItem/index"
 import { type GetEntryItemRequestData ,type CreateOrUpdateEntryItemRequestData} from "@/api/entryItem/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { Search, Refresh, CirclePlus, Delete, Download, RefreshRight } from "@element-plus/icons-vue"
@@ -40,6 +40,8 @@ const handleCreateOrUpdateEntryItem = () => {
       return;
     }
     loading.value = true
+    formData.value.entryItemConditions = formData.value.entryItemConditions.join(';')
+    formData.value.entryItemAgreements = formData.value.entryItemAgreements.join(';')
     const api = formData.value.id === undefined ? CreatEntryItemDataApi : updateEntryItemDataApi
     api(formData.value,selectedProject.value)
       .then(() => {
@@ -80,9 +82,72 @@ const handleDelete = (row) => {
 //#endregion
 
 //region 改
+const conditionOptions = ref([])
+const agreementOptions = ref([])
+//region 改
 const handleUpdate = (row: GetEntryItemRequestData) => {
+  getEntryItemConditionApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var conditionList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      conditionList.push(item)
+    }
+    conditionOptions.value = conditionList
+  })
+  getEntryItemAgreementApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var agreementList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      agreementList.push(item)
+    }
+    agreementOptions.value = agreementList
+  })
   dialogVisible.value = true
-  formData.value = JSON.parse(JSON.stringify(row))
+  var entryItemData = JSON.parse(JSON.stringify(row))
+  entryItemData['entryItemConditions'] = entryItemData['entryItemConditions'].split(';')
+  entryItemData['entryItemAgreements'] = entryItemData['entryItemAgreements'].split(';')
+  formData.value = entryItemData
+}
+
+
+const handleInsertClick = () => {
+  getEntryItemConditionApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var conditionList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      conditionList.push(item)
+    }
+    conditionOptions.value = conditionList
+  })
+  getEntryItemAgreementApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var agreementList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      agreementList.push(item)
+    }
+    agreementOptions.value = agreementList
+  })
+  dialogVisible.value = true
 }
 //endregion
 
@@ -154,7 +219,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchEn
     <el-card v-loading="loading" shadow="never">
       <div class="toolbar-wrapper">
         <div>
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增合约条目类型</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="handleInsertClick">新增合约条目类型</el-button>
           <el-button type="danger" :icon="Delete">批量删除</el-button>
         </div>
         <div>
@@ -206,11 +271,25 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchEn
         </el-form-item>
         
         <el-form-item prop="entryItemConditions" label="合约条目类型执行条件">
-          <el-input v-model="formData.entryItemConditions" placeholder="请输入" />
+          <el-select v-model="formData.entryItemConditions" multiple placeholder="请选择"  style="width:100%">
+            <el-option 
+              v-for="item in conditionOptions" 
+              :key="item.name" 
+              :label="item.name" 
+              :value="item.name" 
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item prop="entryItemAgreements" label="合约条目类型组成约定">
-          <el-input v-model="formData.entryItemAgreements" placeholder="请输入" />
+          <el-select v-model="formData.entryItemAgreements" multiple placeholder="请选择"  style="width:100%">
+            <el-option 
+              v-for="item in agreementOptions" 
+              :key="item.name" 
+              :label="item.name" 
+              :value="item.name" 
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item prop="demandId" label="对应需求id">

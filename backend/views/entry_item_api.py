@@ -66,3 +66,23 @@ def deleteEntryItem():
     delete(sql, None)
     print("delete entryItem!")
     return jsonify({"message": "映射类型删除成功"}), 200
+
+
+@entryItem_api_blueprint.route('/getEntryItemCondition', methods=['POST'])
+def getEntryItemCondition():
+    projecname = request.form.get('projectname')
+    table_name = f"{projecname}Condition"
+    fetch_sql = f"SELECT conditionName as name FROM `{table_name}`"
+    dataInputs = fetch_all(fetch_sql, ())
+    print(dataInputs)
+    return jsonify({"list": dataInputs})
+
+
+@entryItem_api_blueprint.route('/getEntryItemAgreement', methods=['POST'])
+def getEntryItemAgreement():
+    projecname = request.form.get('projectname')
+    table_name = f"{projecname}Agreement"
+    fetch_sql = f"SELECT agreementName as name FROM `{table_name}`"
+    dataInputs = fetch_all(fetch_sql, ())
+    print(dataInputs)
+    return jsonify({"list": dataInputs})

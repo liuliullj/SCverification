@@ -30,7 +30,7 @@ def getDemandData():
     category_filter = "category='功能' OR category='执行流程' OR category='业务' OR category='智能合约' "
     fetch_sql = f"SELECT * FROM `{table_name}` WHERE {category_filter} LIMIT %s OFFSET %s"
     demands = fetch_all(fetch_sql,(size,offset))
-    count_sql = f"SELECT COUNT(*) AS total FROM `{table_name}`"
+    count_sql = f"SELECT COUNT(*) AS total FROM `{table_name}` WHERE {category_filter}"
     total = fetch_one(count_sql, None)['total']
     print(demands)
     return jsonify({"list": demands, "total": total})

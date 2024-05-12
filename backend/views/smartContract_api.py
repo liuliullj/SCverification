@@ -62,3 +62,13 @@ def deleteSmartContract():
     delete(sql, None)
     print("delete smartContract!")
     return jsonify({"message": "智能合约类型删除成功"}), 200
+
+
+@smartContract_api_blueprint.route('/getSmartContractEntryItem', methods=['POST'])
+def getSmartContractEntryItem():
+    projecname = request.form.get('projectname')
+    table_name = f"{projecname}EntryItem"
+    fetch_sql = f"SELECT entryItemName as name FROM `{table_name}`"
+    dataInputs = fetch_all(fetch_sql, ())
+    print(dataInputs)
+    return jsonify({"list": dataInputs})

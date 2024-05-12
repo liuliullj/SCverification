@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { reactive, ref, watch, onMounted} from "vue"
-import { getProjectNameApi,getSmartContractDataApi, CreatSmartContractDataApi, updateSmartContractDataApi, deleteSmartContractDataApi} from "@/api/smartContract/index"
+import { getProjectNameApi,getSmartContractDataApi, CreatSmartContractDataApi, updateSmartContractDataApi, deleteSmartContractDataApi, getSmartContractEntryItemApi} from "@/api/smartContract/index"
 import { type GetSmartContractRequestData ,type CreateOrUpdateSmartContractRequestData} from "@/api/smartContract/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { Search, Refresh, CirclePlus, Delete, Download, RefreshRight } from "@element-plus/icons-vue"
@@ -38,6 +38,7 @@ const handleCreateOrUpdateSmartContract = () => {
       return;
     }
     loading.value = true
+    formData.value.smartContractEntryItems = formData.value.smartContractEntryItems.join(';')
     const api = formData.value.id === undefined ? CreatSmartContractDataApi : updateSmartContractDataApi
     api(formData.value,selectedProject.value)
       .then(() => {
@@ -78,11 +79,46 @@ const handleDelete = (row) => {
 //#endregion
 
 //region 改
+const entryItemOptions = ref([])
+//region 改
 const handleUpdate = (row: GetSmartContractRequestData) => {
+  getSmartContractEntryItemApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var dataList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      dataList.push(item)
+    }
+    entryItemOptions.value = dataList
+  })
+  
   dialogVisible.value = true
-  formData.value = JSON.parse(JSON.stringify(row))
+  var entryItemData = JSON.parse(JSON.stringify(row))
+  entryItemData['smartContractEntryItems'] = entryItemData['smartContractEntryItems'].split(';')
+  formData.value = entryItemData
 }
 
+
+const handleInsertClick = () => {
+  getSmartContractEntryItemApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var dataList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      dataList.push(item)
+    }
+    entryItemOptions.value = dataList
+  })
+  dialogVisible.value = true
+}
 
 
 
@@ -152,7 +188,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchSm
     <el-card v-loading="loading" shadow="never">
       <div class="toolbar-wrapper">
         <div>
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增智能合约类型</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="handleInsertClick">新增智能合约类型</el-button>
           <el-button type="danger" :icon="Delete">批量删除</el-button>
         </div>
         <div>
@@ -203,7 +239,14 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchSm
         </el-form-item>
         
         <el-form-item prop="smartContractEntryItems" label="智能合约类型组成条目">
-          <el-input v-model="formData.smartContractEntryItems" placeholder="请输入" />
+          <el-select v-model="formData.smartContractEntryItems" multiple placeholder="请选择"  style="width:100%">
+            <el-option 
+              v-for="item in entryItemOptions" 
+              :key="item.name" 
+              :label="item.name" 
+              :value="item.name" 
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item prop="demandId" label="对应需求id">

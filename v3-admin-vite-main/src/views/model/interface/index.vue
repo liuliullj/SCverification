@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { reactive, ref, watch, onMounted} from "vue"
-import { getProjectNameApi,getInterfaceDataApi, CreatInterfaceDataApi, updateInterfaceDataApi, deleteInterfaceDataApi} from "@/api/interface/index"
+import { getProjectNameApi,getInterfaceDataApi, CreatInterfaceDataApi, updateInterfaceDataApi, deleteInterfaceDataApi, getInterfaceMemberApi, getInterfaceMethodsApi} from "@/api/interface/index"
 import { type GetInterfaceRequestData ,type CreateOrUpdateInterfaceRequestData} from "@/api/interface/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { Search, Refresh, CirclePlus, Delete, Download, RefreshRight } from "@element-plus/icons-vue"
@@ -41,6 +41,8 @@ const handleCreateOrUpdateInterface = () => {
     }
     loading.value = true
     const api = formData.value.id === undefined ? CreatInterfaceDataApi : updateInterfaceDataApi
+    formData.value.interfaceMember = formData.value.interfaceMember.join(';')
+    formData.value.interfaceMethods = formData.value.interfaceMethods.join(';')
     api(formData.value,selectedProject.value)
       .then(() => {
         ElMessage.success("操作成功")
@@ -80,9 +82,73 @@ const handleDelete = (row) => {
 //#endregion
 
 //region 改
+const memberOptions = ref([])
+const methodsOptions = ref([])
+//region 改
 const handleUpdate = (row: GetInterfaceRequestData) => {
+  getInterfaceMemberApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var memberList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      memberList.push(item)
+    }
+    memberOptions.value = memberList
+  })
+  getInterfaceMethodsApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var methodsList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      methodsList.push(item)
+    }
+    methodsOptions.value = methodsList
+  })
   dialogVisible.value = true
-  formData.value = JSON.parse(JSON.stringify(row))
+  var interfaceData = JSON.parse(JSON.stringify(row))
+  interfaceData['interfaceMember'] = interfaceData['interfaceMember'].split(';')
+  interfaceData['interfaceMethods'] = interfaceData['interfaceMethods'].split(';')
+  formData.value = interfaceData
+}
+
+
+const handleInsertClick = () => {
+  getInterfaceMemberApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var memberList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      memberList.push(item)
+    }
+    memberList.push({'name': 'Null'})
+    memberOptions.value = memberList
+  })
+  getInterfaceMethodsApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var methodsList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      methodsList.push(item)
+    }
+    methodsOptions.value = methodsList
+  })
+  dialogVisible.value = true
 }
 //endregion
 
@@ -154,7 +220,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchIn
     <el-card v-loading="loading" shadow="never">
       <div class="toolbar-wrapper">
         <div>
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增接口类型</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="handleInsertClick">新增接口类型</el-button>
           <el-button type="danger" :icon="Delete">批量删除</el-button>
         </div>
         <div>
@@ -206,11 +272,25 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchIn
         </el-form-item>
         
         <el-form-item prop="interfaceMember" label="接口类型组成成员">
-          <el-input v-model="formData.interfaceMember" placeholder="请输入" />
+          <el-select v-model="formData.interfaceMember" multiple placeholder="请选择"  style="width:100%">
+            <el-option 
+              v-for="item in memberOptions" 
+              :key="item.name" 
+              :label="item.name" 
+              :value="item.name" 
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item prop="interfaceMethods" label="接口类型组成方法">
-          <el-input v-model="formData.interfaceMethods" placeholder="请输入" />
+          <el-select v-model="formData.interfaceMethods" multiple placeholder="请选择"  style="width:100%">
+            <el-option 
+              v-for="item in methodsOptions" 
+              :key="item.name" 
+              :label="item.name" 
+              :value="item.name" 
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item prop="demandId" label="对应需求id">

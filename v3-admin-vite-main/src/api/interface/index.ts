@@ -11,6 +11,35 @@ export function getProjectNameApi(){
   return axios.get(`${BASE_URL}/myapi/getProjectName`)
 }
 
+export function getInterfaceMemberApi(paras){
+  console.log("getInterfaceMemberApi")
+  console.log(paras)
+  return axios({
+    method: 'post',
+    url: `${BASE_URL}/myapi/getInterfaceMember`,
+        data: qs.stringify(paras)
+    }).then(function (response) {
+        console.log(response);
+        return response.data;
+    }).catch(function (error) {
+        console.log(error);
+  });
+}
+
+export function getInterfaceMethodsApi(paras){
+  console.log("getInterfaceMethodsApi")
+  console.log(paras)
+  return axios({
+    method: 'post',
+    url: `${BASE_URL}/myapi/getInterfaceMethods`,
+        data: qs.stringify(paras)
+    }).then(function (response) {
+        console.log(response);
+        return response.data;
+    }).catch(function (error) {
+        console.log(error);
+  });
+}
 
 export function getInterfaceDataApi(paras: Table.GetInterfaceRequestData){
   console.log(paras)

@@ -85,3 +85,18 @@ export function deleteAgreementDataApi(id:string, projectname:string){
         console.log(error);
   });
 }
+
+export function getAgreementInterfaceApi(paras){
+  console.log("getAgreementInterfaceApi")
+  console.log(paras)
+  return axios({
+    method: 'post',
+    url: `${BASE_URL}/myapi/getAgreementInterface`,
+        data: qs.stringify(paras)
+    }).then(function (response) {
+        console.log(response);
+        return response.data;
+    }).catch(function (error) {
+        console.log(error);
+  });
+}

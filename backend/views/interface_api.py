@@ -21,6 +21,26 @@ def getInterfaceData():
     return jsonify({"list": interfaces, "total": total})
 
 
+@interface_api_blueprint.route('/getInterfaceMember', methods=['POST'])
+def getInterfaceMember():
+    projecname = request.form.get('projectname')
+    table_name = f"{projecname}Interface"
+    fetch_sql = f"SELECT interfaceName as name FROM `{table_name}`"
+    memberInputs = fetch_all(fetch_sql, ())
+    print(memberInputs)
+    return jsonify({"list": memberInputs})
+
+
+@interface_api_blueprint.route('/getInterfaceMethods', methods=['POST'])
+def getInterfaceMethods():
+    projecname = request.form.get('projectname')
+    table_name = f"{projecname}Mapping"
+    fetch_sql = f"SELECT mappingName as name FROM `{table_name}`"
+    methodsInputs = fetch_all(fetch_sql, ())
+    print(methodsInputs)
+    return jsonify({"list": methodsInputs})
+
+
 @interface_api_blueprint.route('/createInterface', methods=['POST'])
 def createInterface():
     projectname = request.form.get('projectname')

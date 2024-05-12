@@ -11,8 +11,23 @@ export function getProjectNameApi(){
   return axios.get(`${BASE_URL}/myapi/getProjectName`)
 }
 
+export function getBasicDataInputApi(paras){
+  console.log("getBasicDataInputApi")
+  console.log(paras)
+  return axios({
+    method: 'post',
+    url: `${BASE_URL}/myapi/getBasicDataInput`,
+        data: qs.stringify(paras)
+    }).then(function (response) {
+        console.log(response);
+        return response.data;
+    }).catch(function (error) {
+        console.log(error);
+  });
+}
 
-export function getMappingDataApi(paras: Table.GetMappingRequestData){
+
+export function getMappingDataApi(paras){
   console.log(paras)
   return axios({
     method: 'post',

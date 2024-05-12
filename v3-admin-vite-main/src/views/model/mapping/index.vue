@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { reactive, ref, watch, onMounted} from "vue"
-import { getProjectNameApi,getMappingDataApi, CreatMappingDataApi, updateMappingDataApi, deleteMappingDataApi} from "@/api/mapping/index"
+import { getProjectNameApi,getMappingDataApi, CreatMappingDataApi, updateMappingDataApi, deleteMappingDataApi, getBasicDataInputApi} from "@/api/mapping/index"
 import { type GetMappingRequestData ,type CreateOrUpdateMappingRequestData} from "@/api/mapping/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { Search, Refresh, CirclePlus, Delete, Download, RefreshRight } from "@element-plus/icons-vue"
@@ -41,6 +41,9 @@ const handleCreateOrUpdateMapping = () => {
     }
     loading.value = true
     const api = formData.value.id === undefined ? CreatMappingDataApi : updateMappingDataApi
+    formData.value.mappingInputBasicData = formData.value.mappingInputBasicData.join(';')
+    formData.value.mappingOutputBasicData = formData.value.mappingOutputBasicData.join(';')
+    console.log(formData.value)
     api(formData.value,selectedProject.value)
       .then(() => {
         ElMessage.success("操作成功")
@@ -79,10 +82,54 @@ const handleDelete = (row) => {
 };
 //#endregion
 
+const mappingInputBasicDataOptions = ref([])
+const mappingOutputBasicDataOptions = ref([])
 //region 改
 const handleUpdate = (row: GetMappingRequestData) => {
+  getBasicDataInputApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var basicDataInputList = []
+    var basicDataOutputList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      basicDataInputList.push(item)
+      basicDataOutputList.push(item)
+    }
+    mappingInputBasicDataOptions.value = basicDataInputList
+    basicDataOutputList.push({'name': 'Null'})
+    mappingOutputBasicDataOptions.value = basicDataOutputList
+  })
   dialogVisible.value = true
-  formData.value = JSON.parse(JSON.stringify(row))
+  var mappingData = JSON.parse(JSON.stringify(row))
+  mappingData['mappingInputBasicData'] = mappingData['mappingInputBasicData'].split(';')
+  mappingData['mappingOutputBasicData'] = mappingData['mappingOutputBasicData'].split(';')
+  formData.value = mappingData
+}
+
+
+const handleInsertClick = () => {
+  getBasicDataInputApi({projectname: selectedProject.value})
+  .then((data) => {
+    console.log(data)
+    var basicDataInputList = []
+    var basicDataOutputList = []
+    for (let index = 0; index < data.list.length; index++){
+      const element = data.list[index];
+      var item = {
+        "name":element['name']
+      }
+      basicDataInputList.push(item)
+      basicDataOutputList.push(item)
+    }
+    mappingInputBasicDataOptions.value = basicDataInputList
+    basicDataOutputList.push({'name': 'Null'})
+    mappingOutputBasicDataOptions.value = basicDataOutputList
+  })
+  dialogVisible.value = true
 }
 //endregion
 
@@ -154,7 +201,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchMa
     <el-card v-loading="loading" shadow="never">
       <div class="toolbar-wrapper">
         <div>
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增映射类型</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="handleInsertClick">新增映射类型</el-button>
           <el-button type="danger" :icon="Delete">批量删除</el-button>
         </div>
         <div>
@@ -206,11 +253,25 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchMa
         </el-form-item>
         
         <el-form-item prop="mappingInputBasicData" label="映射类型输入参数">
-          <el-input v-model="formData.mappingInputBasicData" placeholder="请输入" />
+          <el-select v-model="formData.mappingInputBasicData" multiple placeholder="请选择"  style="width:100%">
+            <el-option 
+              v-for="item in mappingInputBasicDataOptions" 
+              :key="item.name" 
+              :label="item.name" 
+              :value="item.name" 
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item prop="mappingOutputBasicData" label="映射类型输出参数">
-          <el-input v-model="formData.mappingOutputBasicData" placeholder="请输入" />
+          <el-select v-model="formData.mappingOutputBasicData" multiple placeholder="请选择"  style="width:100%">
+            <el-option 
+              v-for="item in mappingOutputBasicDataOptions" 
+              :key="item.name" 
+              :label="item.name" 
+              :value="item.name" 
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item prop="demandId" label="对应需求id">

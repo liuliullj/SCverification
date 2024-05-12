@@ -62,3 +62,13 @@ def deleteAgreement():
     delete(sql, None)
     print("delete agreement!")
     return jsonify({"message": "合约约定类型删除成功"}), 200
+
+
+@agreement_api_blueprint.route('/getAgreementInterface', methods=['POST'])
+def getAgreementInterface():
+    projecname = request.form.get('projectname')
+    table_name = f"{projecname}Interface"
+    fetch_sql = f"SELECT interfaceName as name FROM `{table_name}`"
+    memberInputs = fetch_all(fetch_sql, ())
+    print(memberInputs)
+    return jsonify({"list": memberInputs})

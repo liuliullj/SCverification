@@ -85,3 +85,18 @@ export function deleteSmartContractDataApi(id:string, projectname:string){
         console.log(error);
   });
 }
+
+export function getSmartContractEntryItemApi(paras){
+  console.log("getSmartContractEntryItemApi")
+  console.log(paras)
+  return axios({
+    method: 'post',
+    url: `${BASE_URL}/myapi/getSmartContractEntryItem`,
+        data: qs.stringify(paras)
+    }).then(function (response) {
+        console.log(response);
+        return response.data;
+    }).catch(function (error) {
+        console.log(error);
+  });
+}

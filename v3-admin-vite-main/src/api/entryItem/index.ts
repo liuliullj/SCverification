@@ -87,3 +87,33 @@ export function deleteEntryItemDataApi(id:string, projectname:string){
         console.log(error);
   });
 }
+
+export function getEntryItemConditionApi(paras){
+  console.log("getEntryItemConditionApi")
+  console.log(paras)
+  return axios({
+    method: 'post',
+    url: `${BASE_URL}/myapi/getEntryItemCondition`,
+        data: qs.stringify(paras)
+    }).then(function (response) {
+        console.log(response);
+        return response.data;
+    }).catch(function (error) {
+        console.log(error);
+  });
+}
+
+export function getEntryItemAgreementApi(paras){
+  console.log("getEntryItemAgreementApi")
+  console.log(paras)
+  return axios({
+    method: 'post',
+    url: `${BASE_URL}/myapi/getEntryItemAgreement`,
+        data: qs.stringify(paras)
+    }).then(function (response) {
+        console.log(response);
+        return response.data;
+    }).catch(function (error) {
+        console.log(error);
+  });
+}
