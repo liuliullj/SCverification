@@ -35,12 +35,20 @@ const formRef = ref<FormInstance | null>(null)
 const formData = ref<VerifyStructureRequestData>(JSON.parse(JSON.stringify(DEFAULT_FORM_DATA)))
 
 
-const verifyStructure = (row: GetStructureRequestData) => {
+//获取多行待验证数据
+const getAllRowsForDemandId = (demandId) => {
+  return structureData.value.filter(row => row.demandId === demandId);
+};
+
+const verifyStructure = (demandId) => {
   if (selectedProject.value.length === 0) {
     return;
   }
   verificationResult.value = '正在生成验证结果，请稍等...'
-  formData.value = JSON.parse(JSON.stringify(row))
+  let rowsToVerify = getAllRowsForDemandId(demandId)
+  formData.value = JSON.parse(JSON.stringify(rowsToVerify))
+  console.log("rows:")
+  console.log(formData.value)
   const api = verifyStructureDataApi
   api(formData.value,selectedProject.value)
     .then((data) => {
@@ -51,6 +59,24 @@ const verifyStructure = (row: GetStructureRequestData) => {
       loading.value = false
     })
 }
+// const verifyStructure = (row: GetStructureRequestData) => {
+//   if (selectedProject.value.length === 0) {
+//     return;
+//   }
+//   verificationResult.value = '正在生成验证结果，请稍等...'
+//   formData.value = JSON.parse(JSON.stringify(row))
+//   const api = verifyStructureDataApi
+//   api(formData.value,selectedProject.value)
+//     .then((data) => {
+//       console.log('###### verifyStructure ', data)
+//       verificationResult.value = data['result'];
+//     })
+//     .finally(() => {
+//       loading.value = false
+//     })
+// }
+
+
 
 
 /** 获取项目名称列表*/
@@ -120,47 +146,43 @@ const verifyAll = () => {
 /** 监听分页参数的变化 */
 watch([() => structurePaginationData.currentPage, () => structurePaginationData.pageSize], fetchStructureData, { immediate: false })
 
-
-//判断是否需要合并属性
-
-const extractPid = (expression) =>{
-  const match = expression.match(/^\((\d+),\s*(\d+),\s*(\w+)\)$/);
-  return match ? match[2] : null;  // 返回 pid 部分
-};
-
-// 计算每个pid的行索引和计数
-const pidRows = computed(() => {
-  const pidMap = {};
-  structureData.value.forEach((row, index) => {
-    const pid = extractPid(row.expectedExpression);
-    if (pid) {
-      if (!pidMap.hasOwnProperty(pid)) {
-        pidMap[pid] = { startIndex: index, count: 1 }; // 初始化时直接设置count为1
-      } else {
-        pidMap[pid].count++;  // 仅在已存在时递增
-      }
-    }
-  });
-  return pidMap;
-});
-
 const spanMethod = ({ row, column, rowIndex, columnIndex }) => {
-  const pid = extractPid(row.expectedExpression);
-  console.log("spanMethod called");
-  console.log(`Processing row ${rowIndex}, column ${columnIndex} (${column.property}), PID: ${pid}`);
-
-  // 合并目标列的索引可能需要调整，这里用列名称代替固定索引
-  const columnsToMerge = ['demandId', 'demandName', '操作'];
-  if (columnsToMerge.includes(column.property)) {
-    const pidInfo = pidRows.value[pid];
-    if (pidInfo && pidInfo.startIndex === rowIndex) {
-      console.log(`Merging ${pidInfo.count} rows starting from row ${rowIndex} for column ${column.property}`);
-      return pidInfo.count;
+  // 合并需求编号和需求名称列
+  if (column.property === 'demandId' || column.property === 'demandName') {
+    if (rowIndex > 0 && structureData.value[rowIndex].demandId === structureData.value[rowIndex - 1].demandId) {
+      return [0, 0]; // 当前行与上一行的需求编号相同，则这行不显示
     } else {
-      return 0;
+      // 查找相同需求编号的行数来合并
+      let rowCount = 1;
+      for (let i = rowIndex + 1; i < structureData.value.length; i++) {
+        if (structureData.value[i].demandId === row.demandId) {
+          rowCount++;
+        } else {
+          break;
+        }
+      }
+      return [rowCount, 1]; // 合并行数
     }
   }
-  return 1;
+  // 操作列处理，让操作按钮在合并的单元格内居中显示
+  if (column.label === '操作') {
+    if (rowIndex > 0 && structureData.value[rowIndex].demandId === structureData.value[rowIndex - 1].demandId) {
+      return [0, 0]; // 不显示当前行的按钮，因为会在合并中显示
+    } else {
+      // 查找相同需求编号的行数来合并
+      let rowCount = 1;
+      for (let i = rowIndex + 1; i < structureData.value.length; i++) {
+        if (structureData.value[i].demandId === row.demandId) {
+          rowCount++;
+        } else {
+          break;
+        }
+      }
+      return [rowCount, 1]; // 在这些行中合并按钮
+    }
+  }
+  // 对于其他列，如性质Id和期望性质表达式，返回正常显示
+  return [1, 1];
 };
 
 </script>
@@ -186,13 +208,13 @@ const spanMethod = ({ row, column, rowIndex, columnIndex }) => {
       <div class="table-wrapper">
         <el-table :data="structureData" :span-method="spanMethod">
           <el-table-column type="selection" width="50" align="center" />
-          <el-table-column prop="id" label="性质Id" align="center" />
           <el-table-column prop="demandId" label="需求编号" align="center" />
           <el-table-column prop="demandName" label="需求名称" align="center" />
+          <el-table-column prop="id" label="性质Id" align="center" />
           <el-table-column prop="expectedExpression" label="期望性质表达式" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
-              <el-button type="primary" text bg size="small" @click="verifyStructure(scope.row)">验证</el-button>
+              <el-button type="primary" text bg size="small" @click="verifyStructure(scope.row.demandId)">验证</el-button>
             </template>
           </el-table-column>
         </el-table>

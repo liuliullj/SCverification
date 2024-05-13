@@ -23,6 +23,13 @@ def fetch_all(sql, args):
 
     return record_list
 
+def fetch_total(sql):
+    conn, cursor = connect()
+    cursor.execute(sql)
+    record_list = cursor.fetchall()
+    connect_close(conn, cursor)
+
+    return record_list
 
 def fetch_one(sql, args):
     conn, cursor = connect()

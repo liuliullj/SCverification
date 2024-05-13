@@ -27,19 +27,34 @@ export function getStructureDataApi(paras: Table.GetStructureRequestData){
 }
 
 
-export function verifyStructureDataApi(data:Table.VerifyStructureRequestData, projectname:string){
+export function verifyStructureDataApi(data:Table.VerifyStructureRequestData[], projectname:string){
+
+  var ids = ""
+  var expectedExpressions = ""
+  var demandIds = ""
+  var demandNames = ""
+
+  data.forEach(item => {
+    ids = ids + item.id + ";"
+    expectedExpressions = expectedExpressions + item.expectedExpression + ";"
+    demandIds = demandIds + item.demandId + ";"
+    demandNames = demandNames + item.demandName + ";"
+  });
+
   var param = {
     'projectname':projectname,
-    'id':data.id,
-    'expectedExpression':data.expectedExpression,
-    'demandId':data.demandId,
-    'demandName':data.demandName
+    'id':ids,
+    'expectedExpression':expectedExpressions,
+    'demandId':demandIds,
+    'demandName':demandNames
   }
-  console.log("verifyStructureDataApi"+qs.stringify(param))
+
+  console.log("verifyStructureDataApidata:"+qs.stringify(param))
+
   return axios({
     method: 'post',
     url: `${BASE_URL}/myapi/verifyStructure`,
-        data: qs.stringify(param)
+    data: qs.stringify(param)
     }).then(function (response) {
         console.log(response);
         return response.data;

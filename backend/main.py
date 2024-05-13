@@ -196,6 +196,17 @@ def createProject():
                 """
     insert(create_smartContract_sql, None)
 
+
+    table_name = f"{name}StructureRule"
+    creat_structureRule_sql = f"""
+                CREATE TABLE IF NOT EXISTS `{table_name}` (
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `demandId` INT NOT NULL,
+                    `demandName` VARCHAR(255) NOT NULL,
+                    `expectedExpression` VARCHAR(255) NOT NULL
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                """
+    insert(creat_structureRule_sql, None)
     return jsonify({"message": "项目创建成功"}), 200
 
 
@@ -247,6 +258,11 @@ def deleteProject():
         smartContractName = name + "SmartContract"
         sql_delete_smartContract = f"DROP TABLE IF EXISTS `{smartContractName}`;"
         delete(sql_delete_smartContract, None)
+
+        structureRuleName = name + "StructureRule"
+        sql_delete_StructureRule = f"DROP TABLE IF EXISTS `{structureRuleName}`;"
+        delete(sql_delete_StructureRule, None)
+
     #删除该行
     sql = "DELETE FROM projectmanagement WHERE id = %s"
     delete(sql, (id,))
@@ -309,6 +325,11 @@ def updateProject():
         new_smartContract_name = name + "SmartContract"
         rename_smartContract = f"RENAME TABLE `{ori_smartContract_name}` TO `{new_smartContract_name}`;"
         update(rename_smartContract, None)
+
+        ori_structureRule_name = result['name'] + "StructureRule"
+        new_structureRule_name = name + "StructureRule"
+        rename_structureRule = f"RENAME TABLE `{ori_structureRule_name}` TO `{new_structureRule_name}`;"
+        update(rename_structureRule, None)
 
 
     sql = "UPDATE projectmanagement SET name = %s, description = %s WHERE id = %s"
