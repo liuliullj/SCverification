@@ -95,7 +95,7 @@ const handleUpdate = (row: GetAgreementRequestData) => {
     }
     interfaceOptions.value = dataList
   })
-  
+
   dialogVisible.value = true
   var interfaceData = JSON.parse(JSON.stringify(row))
   interfaceData['agreementInterfaces'] = interfaceData['agreementInterfaces'].split(';')
@@ -189,7 +189,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchAg
       <div class="toolbar-wrapper">
         <div>
           <el-button type="primary" :icon="CirclePlus" @click="handleInsertClick">新增合约约定类型</el-button>
-          <el-button type="danger" :icon="Delete">批量删除</el-button>
+          <!-- <el-button type="danger" :icon="Delete">批量删除</el-button> -->
         </div>
         <div>
           <el-tooltip content="刷新当前页">
@@ -237,14 +237,14 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchAg
         <el-form-item prop="agreementName" label="合约约定类型名称">
           <el-input v-model="formData.agreementName" placeholder="请输入" />
         </el-form-item>
-        
+
         <el-form-item prop="agreementInterfaces" label="合约约定类型组成接口">
           <el-select v-model="formData.agreementInterfaces" multiple placeholder="请选择"  style="width:100%">
-            <el-option 
-              v-for="item in interfaceOptions" 
-              :key="item.name" 
-              :label="item.name" 
-              :value="item.name" 
+            <el-option
+              v-for="item in interfaceOptions"
+              :key="item.name"
+              :label="item.name"
+              :value="item.name"
             />
           </el-select>
         </el-form-item>

@@ -97,6 +97,7 @@ const handleUpdate = (row: GetInterfaceRequestData) => {
       }
       memberList.push(item)
     }
+    memberList.push({'name': 'Null'})
     memberOptions.value = memberList
   })
   getInterfaceMethodsApi({projectname: selectedProject.value})
@@ -221,7 +222,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchIn
       <div class="toolbar-wrapper">
         <div>
           <el-button type="primary" :icon="CirclePlus" @click="handleInsertClick">新增接口类型</el-button>
-          <el-button type="danger" :icon="Delete">批量删除</el-button>
+          <!-- <el-button type="danger" :icon="Delete">批量删除</el-button> -->
         </div>
         <div>
           <el-tooltip content="刷新当前页">
@@ -270,25 +271,25 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchIn
         <el-form-item prop="interfaceName" label="接口类型名称">
           <el-input v-model="formData.interfaceName" placeholder="请输入" />
         </el-form-item>
-        
+
         <el-form-item prop="interfaceMember" label="接口类型组成成员">
           <el-select v-model="formData.interfaceMember" multiple placeholder="请选择"  style="width:100%">
-            <el-option 
-              v-for="item in memberOptions" 
-              :key="item.name" 
-              :label="item.name" 
-              :value="item.name" 
+            <el-option
+              v-for="item in memberOptions"
+              :key="item.name"
+              :label="item.name"
+              :value="item.name"
             />
           </el-select>
         </el-form-item>
 
         <el-form-item prop="interfaceMethods" label="接口类型组成方法">
           <el-select v-model="formData.interfaceMethods" multiple placeholder="请选择"  style="width:100%">
-            <el-option 
-              v-for="item in methodsOptions" 
-              :key="item.name" 
-              :label="item.name" 
-              :value="item.name" 
+            <el-option
+              v-for="item in methodsOptions"
+              :key="item.name"
+              :label="item.name"
+              :value="item.name"
             />
           </el-select>
         </el-form-item>

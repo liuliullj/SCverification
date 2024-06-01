@@ -1,19 +1,19 @@
 <script lang="ts" setup>
 import { reactive, ref, watch, onMounted} from "vue"
-import { getProjectNameApi, getSecurityDataApi, verifySecurityDataApi, verifyAllDataApi} from "@/api/security/index"
+import { getProjectNameApi, getSecurityDataApi, verifySecurityDataApi, verifyAllDataApi, uploadFileApi} from "@/api/security/index"
 import { type GetSecurityRequestData, type VerifySecurityRequestData} from "@/api/security/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { Search, Refresh, CirclePlus, Delete, Download, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
+import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 
 defineOptions({
   // 命名当前组件
   name: "Security"
 })
 
-const verificationResult = ref("Hello World!" + '这里是长文本内容\n，如果行数\n增多\n，滚动条\n会自动\n出现。' +
-            '\n可以通过\n在这里添加更多\n的文本\n来测\n试\n滚动条的效果。' +
-            '\n文本行数越多，滚动条\n越有\n可能\n出现。');
+const verificationResult = ref("请点击验证按钮进行验证");
 const loading = ref<boolean>(false)
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
 
@@ -116,9 +116,42 @@ const verifyAll = () => {
 }
 
 
+
 /** 监听分页参数的变化 */
 watch([() => securityPaginationData.currentPage, () => securityPaginationData.pageSize], fetchSecurityData, { immediate: false })
 
+const file = ref(null);
+
+const handleFileUpload = (event) => {
+  file.value = event.target.files[0]; // 获取上传的文件
+};
+
+const parseExcel = () => {
+  if (!file.value) {
+    alert("请先选择一个 Excel 文件。");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const data = e.target.result;
+    const workbook = XLSX.read(data, { type: 'array' }); // 读取文件内容
+    const sheetName = workbook.SheetNames[0]; // 获取第一个工作表的名称
+    const worksheet = workbook.Sheets[sheetName];
+    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 }); // 使用数组形式获取每一行数据
+    const stringArray = json.map(row => row.join("$")); // 将每一行的数组转换为字符串，并用逗号分隔每个单元格
+    console.log(stringArray); // 打印包含所有行字符串的数组
+    const api = uploadFileApi
+    api(stringArray, selectedProject.value)
+    .then((data) => {
+      verificationResult.value = data['result'];
+      console.log('######uploadFile ', data)
+    })
+    .finally(() => {
+      loading.value = false
+    })
+  };
+  reader.readAsArrayBuffer(file.value); // 读取文件为 ArrayBuffer
+};
 
 </script>
 
@@ -136,6 +169,15 @@ watch([() => securityPaginationData.currentPage, () => securityPaginationData.pa
       </el-select>
     </el-card>
     <el-card v-loading="loading" shadow="never">
+
+
+      <!-- <input type="file" @change="handleFileUpload" accept=".xlsx, .xls">
+      <button @click="parseExcel">上传参数列表</button> -->
+      <div style="padding: 20px;">
+      <input type="file" @change="handleFileUpload" accept=".xlsx, .xls" style="font-family: Arial; padding: 10px 20px; margin-right: 10px;">
+      <button @click="parseExcel" style="font-family: Arial; background-color: #3894FF; color: white; border: none; padding: 10px 10px; text-align: center; text-decoration: none; display: inline-block; font-size: 14px; margin: 4px 2px; cursor: pointer;">上传参数列表</button>
+      </div>
+
       <div class="header-with-icon">
         <el-icon class="header-icon"><document /></el-icon>
         <span>可达路径</span>
@@ -143,9 +185,9 @@ watch([() => securityPaginationData.currentPage, () => securityPaginationData.pa
       <div class="table-wrapper">
         <el-table :data="securityData">
           <el-table-column type="selection" width="50" align="center" />
-          <el-table-column prop="id" label="Id" align="center" />
-          <el-table-column prop="pathId" label="路径编号" align="center" />
-          <el-table-column prop="pathName" label="路径名称" align="center" />
+          <!-- <el-table-column prop="id" label="Id" align="center" /> -->
+          <el-table-column prop="pathId" label="路径编号" align="center" width="150" />
+          <el-table-column prop="pathName" label="路径名称" align="center" width="250"/>
           <el-table-column prop="pathExpression" label="路径表达式" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
@@ -172,7 +214,7 @@ watch([() => securityPaginationData.currentPage, () => securityPaginationData.pa
       </div>
       <div class="toolbar-wrapper">
         <div>
-          <el-button type="primary" :icon="CirclePlus" @click="verifyAll()">验证全部需求</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="verifyAll()">验证全部路径</el-button>
         </div>
       </div>
       <div class="app-container">

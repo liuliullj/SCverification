@@ -5,6 +5,7 @@ import { type CreateOrUpdateTableRequestData, type GetTableData ,type CreateOrUp
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { Search, Refresh, CirclePlus, Delete, Download, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
+import {generateApi } from "@/api/generate/index"
 
 defineOptions({
   // 命名当前组件
@@ -32,59 +33,9 @@ const formRules: FormRules<CreateOrUpdateDemandRequestData> = {
   parentD: [{ required: true, trigger: "blur", message: "请输入父需求Id" }]
 }
 
-const handleCreateOrUpdateDemand = () => {
-  formRef.value?.validate((valid: boolean, fields) => {
-    if (!valid) return console.error("表单校验不通过", fields)
-    if (selectedProject.value.length === 0) {
-      ElMessage.success("请先选择一个项目")
-      return;
-    }
-    loading.value = true
-    const api = formData.value.id === undefined ? CreatDemandDateApi : updateDemandDateApi
-    api(formData.value,selectedProject.value)
-      .then(() => {
-        ElMessage.success("操作成功")
-        dialogVisible.value = false
-        fetchProjectData()
-      })
-      .finally(() => {
-        loading.value = false
-      })
-  })
-}
-const resetForm = () => {
-  formRef.value?.clearValidate()
-  formData.value = JSON.parse(JSON.stringify(DEFAULT_FORM_DATA))
-}
+
 //endregion
 
-//region 删
-const handleDelete = (row) => {
-  ElMessageBox.confirm(`正在删除需求：${row.demandname}，确认删除？`, "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning"
-  }).then(() => {
-    deleteDemandDataApi(row.id,selectedProject.value).then(() => {
-      ElMessage.success("删除成功");
-      fetchProjectData();
-    }).catch((error) => {
-      // 这里处理API调用失败的情况
-      ElMessage.error("删除失败：" + error.message);
-    });
-  }).catch(() => {
-    // 这里处理取消操作的情况
-    console.log("取消删除");
-  });
-};
-//#endregion
-
-//region 改
-const handleUpdate = (row: GetTableData) => {
-  dialogVisible.value = true
-  formData.value = JSON.parse(JSON.stringify(row))
-}
-//endregion
 
 
 /** 获取项目名称列表*/
@@ -133,6 +84,24 @@ const fetchProjectData = () =>{
     })
 }
 
+const genResult = ref("请点击生成按钮进行生成");
+const generateLanguage = () => {
+  console.log('generate call')
+  if (selectedProject.value.length === 0) {
+    return;
+  }
+  genResult.value = '正在生成验证结果，请稍等...'
+  const api = generateApi
+  api(selectedProject.value)
+    .then((data) => {
+      console.log('###### generate ', data)
+      genResult.value = data['result'];
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
 /** 监听分页参数的变化 */
 watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchProjectData, { immediate: true })
 
@@ -162,127 +131,21 @@ const categoryString = computed({
           :value="name">
         </el-option>
       </el-select>
+
     </el-card>
-    <el-card v-loading="loading" shadow="never">
-      <div style="margin-bottom: 10px;">
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">生成元语言</el-button>
-          <!-- <el-button type="danger" :icon="Delete">批量删除</el-button> -->
+
+    <div class="toolbar-wrapper">
+      <div>
+        <el-button type="primary" :icon="CirclePlus" @click="generateLanguage()">生成智能合约元语言</el-button>
       </div>
-      <div class="instruction-wrapper" style="margin-bottom: 10px;">
-      <el-card class="box-card">
-        <div slot="header" class="clearfix custom-header">
-          <span style="display: inline-block; margin-bottom: 10px;">元语言生成中...</span><br>
-          <span>Traceability角色信息管理合约元语言如下:</span>
-        </div>
-        <pre class="custom-code"><code>
-UserTypes:Admin | Producer | Logistics | Agency | Customer
-UserStatus: Legal | Frozen | Invalid
-hostAddr:address
-userIndex:uint
-registerInfo:mapping(address→string)
-Condition:importCheck(string)==true
-addition Users{
-userAddress:address
-userName:string
-licenseNo:string
-power:UserTypes
-statu:UserStatus
-isAlreadyRegister:bool}
-Terms no1: Admin can companyInfoImport(companyName, licenseNo, companyType)
-	when !importCheck[licenseNo]
-	where WriteCompanyInfo
-Terms no2: Users can companyInfoImport(userName, licenseNo, power,userAddress)
-	when power!=Customer and UserInfo[licenseNo][power]=power
-	where userRegistrationWrite
-Terms no3: Customer can customerInfoImport(userName, licenseNo, power,userAddress)
-	where CustomerRegistration
-
-
-
-
-
-        </code></pre>
-      </el-card>
-      </div>
-
-      <div class="toolbar-wrapper">
-        <div>
-          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增需求</el-button>
-          <el-button type="danger" :icon="Delete">批量删除</el-button>
-        </div>
-        <div>
-          <el-tooltip content="刷新当前页">
-            <el-button type="primary" :icon="RefreshRight" circle @click="fetchProjectData" />
-          </el-tooltip>
-        </div>
-      </div>
-      <div class="table-wrapper">
-        <el-table :data="demandData">
-          <el-table-column type="selection" width="50" align="center" />
-          <el-table-column prop="id" label="需求Id" align="center" />
-          <el-table-column prop="demandname" label="需求名称" align="center" />
-          <el-table-column prop="category" label="需求类别" align="center" />
-          <el-table-column prop="demanddescription" label="需求描述" align="center" />
-          <el-table-column prop="parentD" label="父需求" align="center" />
-          <el-table-column prop="creatTime" label="创建时间" align="center" />
-          <el-table-column fixed="right" label="操作" width="150" align="center">
-            <template #default="scope">
-              <el-button type="primary" text bg size="small" @click="handleUpdate(scope.row)">修改</el-button>
-              <el-button type="danger" text bg size="small" @click="handleDelete(scope.row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </div>
-      <div class="pager-wrapper">
-        <el-pagination
-          background
-          :layout="paginationData.layout"
-          :page-sizes="paginationData.pageSizes"
-          :total="paginationData.total"
-          :page-size="paginationData.pageSize"
-          :currentPage="paginationData.currentPage"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+    </div>
+    <el-card class="box-card" header="合约元语言">
+      <div slot="header" class="clearfix custom-header scoller-display" style="line-height: 2;">
+        <span>{{ genResult }}</span>
       </div>
     </el-card>
-    <!-- 新增/修改 -->
-    <el-dialog
-      v-model="dialogVisible"
-      :title="formData.id === undefined ? '新增需求' : '修改需求'"
-      @closed="resetForm"
-      width="30%"
-    >
-      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px" label-position="left">
-        <el-form-item prop="demandname" label="需求名">
-          <el-input v-model="formData.demandname" placeholder="请输入" />
-        </el-form-item>
-        <el-form-item prop="category" label="需求类别">
-          <el-cascader
-            v-model="categoryString"
-            :options="[
-              { value: '功能', label: '功能' },
-              { value: '执行流程', label: '执行流程' },
-              { value: '业务', label: '业务' },
-              { value: '智能合约', label: '智能合约' }
-            ]"
-            placeholder="请选择"
-            clearable
-            style="width: 100%;"
-          ></el-cascader>
-        </el-form-item>
-        <el-form-item prop="demanddescription" label="需求描述">
-          <el-input v-model="formData.demanddescription" placeholder="请输入" />
-        </el-form-item>
-        <el-form-item prop="parentD" label="父需求Id">
-          <el-input v-model="formData.parentD" placeholder="请输入" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleCreateOrUpdateDemand" :loading="loading">确认</el-button>
-      </template>
-    </el-dialog>
+
+
   </div>
 </template>
 
@@ -322,4 +185,37 @@ Terms no3: Customer can customerInfoImport(userName, licenseNo, power,userAddres
   margin-bottom: -10px;
 }
 
+.header-with-icon {
+  display: flex;
+  align-items: center; /* 保证文本和图标垂直居中 */
+  margin-bottom: 20px; /* 调整下边距 */
+
+}
+
+.header-icon {
+  margin-right: 8px; /* 在图标和文本之间添加一些间隔 */
+}
+
+.header-with-icon span {
+  font-size: 18px; /* 增加文本的字体大小 */
+}
+
+.text-display {
+  max-height: 300px; /* 最大高度，超过这个高度会显示滚动条 */
+  overflow-y: auto; /* 垂直方向上溢出内容时显示滚动条 */
+  padding: 10px;
+  border: 1px solid #ccc; /* 边框样式 */
+  margin: 10px 0;
+  background-color: #f9f9f9; /* 背景色 */
+  white-space: pre-wrap; /* 保留空白符，允许自动和正常的文本换行 */
+}
+
+.scoller-display {
+  max-height: 800px; /* 最大高度，超过这个高度会显示滚动条 */
+  overflow-y: auto; /* 垂直方向上溢出内容时显示滚动条 */
+  padding: 10px;
+  border: 1px solid #ccc; /* 边框样式 */
+  margin: 10px 0;
+  white-space: pre-wrap; /* 保留空白符，允许自动和正常的文本换行 */
+}
 </style>

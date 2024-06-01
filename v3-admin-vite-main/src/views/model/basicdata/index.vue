@@ -153,7 +153,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchBa
       <div class="toolbar-wrapper">
         <div>
           <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增基础数据类型</el-button>
-          <el-button type="danger" :icon="Delete">批量删除</el-button>
+          <!-- <el-button type="danger" :icon="Delete">批量删除</el-button> -->
         </div>
         <div>
           <el-tooltip content="刷新当前页">
@@ -201,7 +201,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchBa
         <el-form-item prop="basicDataName" label="基础数据类型名称">
           <el-input v-model="formData.basicDataName" placeholder="请输入" />
         </el-form-item>
-        
+
         <el-form-item prop="basicDataExpression" label="基础数据类型表达式">
           <el-input v-model="formData.basicDataExpression" placeholder="请输入" />
         </el-form-item>

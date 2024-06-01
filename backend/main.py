@@ -20,6 +20,7 @@ from views.mapping_api import mapping_api_blueprint
 from views.security_api import security_api_blueprint
 from views.smartContract_api import smartContract_api_blueprint
 from views.structure_api import structure_api_blueprint
+from views.generate_api import generate_api_blueprint
 
 app = Flask(__name__)
 
@@ -207,6 +208,7 @@ def createProject():
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                 """
     insert(creat_structureRule_sql, None)
+
     return jsonify({"message": "项目创建成功"}), 200
 
 
@@ -352,6 +354,7 @@ app.register_blueprint(smartContract_api_blueprint, url_prefix='/myapi')
 app.register_blueprint(structure_api_blueprint, url_prefix='/myapi')
 app.register_blueprint(call_api_blueprint, url_prefix='/myapi')
 app.register_blueprint(security_api_blueprint, url_prefix='/myapi')
+app.register_blueprint(generate_api_blueprint, url_prefix='/myapi')
 
 
 if __name__ == '__main__':

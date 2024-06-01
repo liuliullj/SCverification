@@ -95,7 +95,7 @@ const handleUpdate = (row: GetSmartContractRequestData) => {
     }
     entryItemOptions.value = dataList
   })
-  
+
   dialogVisible.value = true
   var entryItemData = JSON.parse(JSON.stringify(row))
   entryItemData['smartContractEntryItems'] = entryItemData['smartContractEntryItems'].split(';')
@@ -189,7 +189,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchSm
       <div class="toolbar-wrapper">
         <div>
           <el-button type="primary" :icon="CirclePlus" @click="handleInsertClick">新增智能合约类型</el-button>
-          <el-button type="danger" :icon="Delete">批量删除</el-button>
+          <!-- <el-button type="danger" :icon="Delete">批量删除</el-button> -->
         </div>
         <div>
           <el-tooltip content="刷新当前页">
@@ -237,14 +237,14 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchSm
         <el-form-item prop="smartContractName" label="智能合约类型名称">
           <el-input v-model="formData.smartContractName" placeholder="请输入" />
         </el-form-item>
-        
+
         <el-form-item prop="smartContractEntryItems" label="智能合约类型组成条目">
           <el-select v-model="formData.smartContractEntryItems" multiple placeholder="请选择"  style="width:100%">
-            <el-option 
-              v-for="item in entryItemOptions" 
-              :key="item.name" 
-              :label="item.name" 
-              :value="item.name" 
+            <el-option
+              v-for="item in entryItemOptions"
+              :key="item.name"
+              :label="item.name"
+              :value="item.name"
             />
           </el-select>
         </el-form-item>

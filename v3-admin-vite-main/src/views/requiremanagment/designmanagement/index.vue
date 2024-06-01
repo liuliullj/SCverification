@@ -368,7 +368,7 @@ const handleChange = async () => {
       <div class="toolbar-wrapper">
         <div>
           <el-button type="primary" :icon="CirclePlus" @click="dialogVisiblePath = true">新增路径</el-button>
-          <el-button type="danger" :icon="Delete">批量删除</el-button>
+          <!-- <el-button type="danger" :icon="Delete">批量删除</el-button> -->
         </div>
         <div>
           <el-tooltip content="刷新当前页">

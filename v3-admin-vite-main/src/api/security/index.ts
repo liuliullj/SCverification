@@ -66,3 +66,30 @@ export function verifyAllDataApi(data:string, projectname:string){
   });
 }
 
+
+export function uploadFileApi(data:string[], projectname:string){
+
+  var keyvalues = ""
+
+
+  data.forEach(item => {
+    keyvalues = keyvalues + item + "#"
+  });
+  var param = {
+    'projectname':projectname,
+    'keyvalues':keyvalues,
+  }
+  console.log(keyvalues)
+  console.log("uploadFileApi"+qs.stringify(param))
+  return axios({
+    method: 'post',
+    url: `${BASE_URL}/myapi/uploadFileApi`,
+        data: qs.stringify(param)
+    }).then(function (response) {
+        console.log(response);
+        return response.data;
+    }).catch(function (error) {
+        console.log(error);
+  });
+}
+

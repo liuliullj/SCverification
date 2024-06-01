@@ -170,7 +170,7 @@ const categoryString = computed({
           <span>请按照如下智能合约组成结构需求模版录入需求：</span>
         </div>
         <pre class="custom-code"><code>
-SmartContract::=ContractItem<sup>+</sup>
+<!-- SmartContract::=ContractItem<sup>+</sup>
 ContractItem::=(Condition<sup>*</sup>,Agreement)<sup>+</sup>
 Agreement::=Workflow<sup>+</sup> | if Condition then Workflow else Workflow
 Workflow::=f<sub>1</sub>([RelevantRole|RelevantGood|RelevantAssets]<sup>+</sup>)
@@ -182,7 +182,21 @@ RelevantAssets::=CER|...
 Condition::=[RelevantRole|RelevantGood|RelevantAssets]<sup>+</sup> conditionoperator values
 conditionoperator::=&gt;|&lt;|&ge;|&le;|=|&ne;
 ContractBasedTransaction::=Transaction<sup>+</sup>
-Transaction::=(BlockChain<sub>i</sub>.SmartContract<sub>m</sub>.f<sub>r</sub>),...(BlockChain<sub>j</sub>.SmartContract<sub>n</sub>.f<sub>s</sub>)
+Transaction::=(BlockChain<sub>i</sub>.SmartContract<sub>m</sub>.f<sub>r</sub>),...(BlockChain<sub>j</sub>.SmartContract<sub>n</sub>.f<sub>s</sub>) -->
+ContractBasedTransactions::= Transaction<sup>+</sup>
+Transaction::=(BlockChain<sub>i</sub>.SmartContract<sub>m</sub>.f<sub>r</sub>),…,(BlockChain<sub>j</sub>.SmartContract<sub>n</sub>.f<sub>s</sub>)
+SmartContract::=Business<sup>+</sup>
+Business ::=(Condition<sup>*</sup>, Workflow)<sup>+</sup>
+Workflow::=Function<sup>+</sup>
+Function ::=Method<sub>1</sub>([RelevantRole|RelevantGoods|RelevantAssets]<sup>+</sup>),
+            Method<sub>2</sub>([RelevantRole|RelevantGoods|RelevantAssets]<sup>+</sup>),…,
+            Method<sub>k</sub>([RelevantRole|RelevantGoods|RelevantAssets]<sup>+</sup>)
+Condition ::= [RelevantRole|RelevantGoods|RelevantAssets]<sup>+</sup> conditionOperator values
+conditionOperator ::= &gt;|&lt;|&ge;|&le;|=|&ne;
+RelevantRole ::= provider | consumer | trade |…
+RelevantGoods ::= amount | count | …
+RelevantAssets ::= CER | …
+
         </code></pre>
       </el-card>
       </div>
@@ -190,7 +204,7 @@ Transaction::=(BlockChain<sub>i</sub>.SmartContract<sub>m</sub>.f<sub>r</sub>),.
       <div class="toolbar-wrapper">
         <div>
           <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增需求</el-button>
-          <el-button type="danger" :icon="Delete">批量删除</el-button>
+          <!-- <el-button type="danger" :icon="Delete">批量删除</el-button> -->
         </div>
         <div>
           <el-tooltip content="刷新当前页">

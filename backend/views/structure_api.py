@@ -19,15 +19,6 @@ def getExpectedExpression(demand):
 
 
 
-
-def getAllVerificationResult(projectname, demandList):
-    str_name = ''
-    for demand in demandList:
-        str_name += demand['demandName']
-        str_name += '\n'
-    return projectname + '\n' + str_name + '\n这\n里\n是\n结\n构\n正\n确\n性\n验\n证\n全部需求\n的\n结\n果，\n请\n查\n看\n是\n否\n是\n多\n行\n显\n示\n'
-
-
 def genStructureRule(projecname):
     table_name = f"{projecname}Demand"
     category_filter = "category='功能' OR category='执行流程' OR category='业务' OR category='智能合约' "
@@ -54,6 +45,7 @@ def genStructureRule(projecname):
         update(id_sql, None)
         insert_sql = f"INSERT INTO `{structureRule_name}` (demandId, demandName, expectedExpression) VALUES (%s, %s, %s)"
         insert(insert_sql, (demand['parentD'], id2name[demand['parentD']], expectedExpression))
+
 
 
 @structure_api_blueprint.route('/getStructure', methods=['POST'])
@@ -116,44 +108,183 @@ def getStructureData():
     # return jsonify({"list": result, "total": total})
 
 
-def getVerificationResult(projectname, expectedExpression, demandId):
-    expectedExpression = expectedExpression[1:-1]
+def getVerificationResult(projectname, expectedExpression, exid):
+    expectedExpression = expectedExpression[1:-1] #(9,6,AggregationRelation)
     parts = expectedExpression.split(',')
-    demandId = int(parts[0])
-    pId = int(parts[1])
+    demandId = int(parts[0]) #子需求
+    pId = int(parts[1]) #父需求
     relation = parts[2]
 
-    #验证demandId对应的类型是否存在
-    result = "验证需求:\n"
-    demandId = int(demandId)
-    
+    #验证demandId对应的类型是否存在 需要读取
+    result = ""
+    demand_table_name = projectname + "Demand"
+    interface_table_name = projectname + "Interface"
+    agreement_table_name = projectname + "Agreement"
+    entry_table_name = projectname + "EntryItem"
+    sc_table_name = projectname + "SmartContract"
+
+    searchdemandSql = f"SELECT * FROM `{demand_table_name}` WHERE id = %s"
+    demandPid = fetch_one(searchdemandSql, (pId,))
+    #print(demandPid)
+    if demandPid['category'] == "智能合约":
+        searchSCsql = f"SELECT * FROM `{sc_table_name}` WHERE demandId = %s"
+        smartContractPid = fetch_one(searchSCsql, (pId, ))
+        smartContractEntryItems = smartContractPid["smartContractEntryItems"]
+        searchEntrysql = f"SELECT * FROM `{entry_table_name}` WHERE demandId = %s"
+        entrySon = fetch_one(searchEntrysql, (demandId, ))
+        if entrySon:
+            entryItemName = entrySon["entryItemName"]
+            if(entryItemName in smartContractEntryItems):
+                result += "需求" + str(pId) + "的性质" + exid + "验证通过!\n"
+            else:
+                result += "需求" + str(pId) + "的性质" + exid + "对应类型不存在聚合关系规则，验证不通过\n"
+        else:
+            result += "需求" + str(pId) + "的性质" + exid + "对应类型不存在，验证不通过\n"
+    elif demandPid['category'] == "业务":
+        searchentrysql = f"SELECT * FROM `{entry_table_name}` WHERE demandId = %s"
+        entryPid = fetch_one(searchentrysql, (pId,))
+        entryItemAgreements = entryPid['entryItemAgreements']
+        searchAgreesql = f"SELECT * FROM `{agreement_table_name}` WHERE demandId = %s"
+        agreeson = fetch_one(searchAgreesql, (demandId, ))
+        if agreeson:
+            agreeName = agreeson["agreementName"]
+            if(agreeName in entryItemAgreements):
+                result += "需求" + str(pId) + "的性质" + exid + "验证通过!\n"
+            else:
+                result += "需求" + str(pId) + "的性质" + exid + "对应类型不存在聚合关系规则，验证不通过\n"
+        else:
+            result += "需求" + str(pId) + "的性质" + exid + "对应类型不存在，验证不通过\n"
+    elif demandPid['category'] == "执行流程":
+        searchAgree = f"SELECT * FROM `{agreement_table_name}` WHERE demandId = %s"
+        agreePid = fetch_one(searchAgree, (pId,))
+        agreementInterfaces = agreePid['agreementInterfaces']
+        searchIntersql = f"SELECT * FROM `{interface_table_name}` WHERE demandId = %s"
+        inetrson = fetch_one(searchIntersql, (demandId, ))
+        if inetrson:
+            intername = inetrson['interfaceName']
+            if(intername in agreementInterfaces):
+                result += "需求" + str(pId) + "的性质" + exid + "验证通过!\n"
+            else:
+                result += "需求" + str(pId) + "的性质" + exid + "对应类型不存在聚合关系规则，验证不通过\n"
+        else:
+            result += "需求" + str(pId) + "的性质" + exid + "对应类型不存在，验证不通过\n"
+
+    # print(demandId)
+    # print(pId)
+    # print(relation)
+    return result
 
 
-    print(demandId)
-    print(pId)
-    print(relation)
-    return relation
+def getParentVer(projectname, demandId):
+    result = ""
+    # expectedExpression = expectedExpression[1:-1] #(9,6,AggregationRelation)
+    # parts = expectedExpression.split(',')
+    # demandId = int(parts[0]) #子需求
+    pId = int(demandId) #父需求
+
+    demand_table_name = projectname + "Demand"
+    interface_table_name = projectname + "Interface"
+    agreement_table_name = projectname + "Agreement"
+    entry_table_name = projectname + "EntryItem"
+    sc_table_name = projectname + "SmartContract"
+
+    searchdemandSql = f"SELECT * FROM `{demand_table_name}` WHERE id = %s"
+    demandPid = fetch_one(searchdemandSql, (pId,))
+    #print(demandPid)
+    if demandPid['category'] == "智能合约":
+        searchSCsql = f"SELECT * FROM `{sc_table_name}` WHERE demandId = %s"
+        smartContractPid = fetch_one(searchSCsql, (pId,))
+        if smartContractPid:  # 判断父需求是否有对应的类型
+            result += "需求"+str(pId)+"验证通过!\n"
+        else:
+            result += "需求" + str(pId) + "缺少对应类型,验证不通过\n"
+    elif demandPid['category'] == '业务':
+        searchentrysql = f"SELECT * FROM `{entry_table_name}` WHERE demandId = %s"
+        entryPid = fetch_one(searchentrysql, (pId,))
+        if entryPid:
+            result += "需求" + str(pId) + "验证通过!\n"
+        else:
+            result += "需求" + str(pId) + "缺少对应类型,验证不通过\n"
+    elif demandPid['category'] == '执行流程':
+        searchAgree = f"SELECT * FROM `{agreement_table_name}` WHERE demandId = %s"
+        agreePid = fetch_one(searchAgree, (pId,))
+        if agreePid:
+            result += "需求" + str(pId) + "验证通过!\n"
+        else:
+            result += "需求" + str(pId) + "缺少对应类型,验证不通过\n"
+    elif demandPid['category'] == '功能':
+        searchIntersql = f"SELECT * FROM `{interface_table_name}` WHERE demandId = %s"
+        interPid = fetch_one(searchIntersql, (pId,))
+        if interPid:
+            result += "需求" + str(pId) + "验证通过!\n"
+        else:
+            result += "需求" + str(pId) + "缺少对应类型,验证不通过\n"
+
+    return result
+
+def getSCverify(projectname, expectedExpression, exid):
+    expectedExpression = expectedExpression[1:-1] #(9,6,AggregationRelation)
+    parts = expectedExpression.split(',')
+    demandId = int(parts[0]) #子需求
+    pId = int(parts[1]) #父需求
+    result = ""
+    sc_table_name = projectname + "SmartContract"
+    searchSCsql = f"SELECT * FROM `{sc_table_name}` WHERE demandId = %s"
+    sc = fetch_one(searchSCsql, (demandId, ))
+    if sc:
+        result += "需求" + str(pId) + "的性质" + exid + "验证通过!\n"
+    else:
+        result += "需求" + str(demandId) + "缺少对应类型,验证不通过\n"
+    return result
+
+
 
 @structure_api_blueprint.route('/verifyStructure', methods=['POST'])
 def verifyStructure():
-    print("ehweew")
 
     projectname = request.form.get('projectname')
     expectedExpression = request.form.get('expectedExpression')
     demandId = request.form.get('demandId')
     demandName = request.form.get('demandName')
+    ids = request.form.get('id')
     print(expectedExpression)
     expectedExpression = expectedExpression[:-1]
     parts = expectedExpression.split(';')
     demandId = demandId[:-1]
     demandId = demandId.split(';')[0]
+    ids = ids[:-1]
+    ids = ids.split(';')
     result = ""
     result += "需求" + demandId + "验证开始:\n"
-    for part in parts:
-        part_ver = getVerificationResult(projectname, part, demandId)
 
-    print('verifyStructure', projectname + ' ' + expectedExpression + ' ' + demandId + ' ' + demandName)
+    #print(type(demandId[0]))
+    if demandId == "0":
+        result += "验证性质:\n"
+        for i in range(len(parts)):
+            verSCRe = getSCverify(projectname, parts[i], ids[i])
+            result += verSCRe
+    else:
+        result += "验证需求:\n"
+        parent_exist_ver = getParentVer(projectname, demandId)
+        result += parent_exist_ver
+        result += "验证性质:\n"
+        for i in range(len(parts)):
+            part_ver = getVerificationResult(projectname, parts[i], ids[i])
+            result += part_ver
+
+    # for part in parts:
+    #     part_ver = getVerificationResult(projectname, part, demandId)
+
     return jsonify({"result": result}), 200
+
+
+
+def getAllVerificationResult(projectname, demandList):
+    str_name = ''
+    for demand in demandList:
+        str_name += demand['demandName']
+        str_name += '\n'
+    return projectname + '\n' + str_name + '\n这\n里\n是\n结\n构\n正\n确\n性\n验\n证\n全部需求\n的\n结\n果，\n请\n查\n看\n是\n否\n是\n多\n行\n显\n示\n'
 
 
 @structure_api_blueprint.route('/verifyAllStructure', methods=['POST'])
@@ -163,5 +294,36 @@ def verifyAll():
     demandList = json.loads(demandList)
 
     print('verifyStructure', projectname)
-    print(demandList)
-    return jsonify({"result": getAllVerificationResult(projectname, demandList)}), 200
+
+    result = "验证需求:\n"
+    structureRule_table_name = projectname + "StructureRule"
+    all_demandsId_sql = f"SELECT DISTINCT demandId FROM `{structureRule_table_name}`"
+    all_demandIds = fetch_all(all_demandsId_sql, ())
+
+    allRules_sql = f"SELECT * FROM `{structureRule_table_name}`"
+    all_Rules = fetch_total(allRules_sql)
+
+    expectedRes = ""
+    SCverifyRes = ""
+    for Rule in all_Rules:
+        if Rule["demandId"] == 0:
+            verRes = getSCverify(projectname, Rule['expectedExpression'], str(Rule['id']))
+            SCverifyRes += verRes
+        else:
+            verRes = getVerificationResult(projectname, Rule['expectedExpression'], str(Rule['id']))
+            expectedRes += verRes
+
+    demandRes = ""
+    for demandId in all_demandIds:
+        print(demandId['demandId'])
+        if demandId['demandId'] != 0:
+            res = getParentVer(projectname, demandId['demandId'])
+            demandRes += res
+
+    result += SCverifyRes
+    result += demandRes
+    result += "验证性质:\n"
+    result += expectedRes
+
+
+    return jsonify({"result": result}), 200

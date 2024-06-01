@@ -158,7 +158,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchCo
       <div class="toolbar-wrapper">
         <div>
           <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增条件类型</el-button>
-          <el-button type="danger" :icon="Delete">批量删除</el-button>
+          <!-- <el-button type="danger" :icon="Delete">批量删除</el-button> -->
         </div>
         <div>
           <el-tooltip content="刷新当前页">
@@ -208,7 +208,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchCo
         <el-form-item prop="conditionName" label="条件类型名称">
           <el-input v-model="formData.conditionName" placeholder="请输入" />
         </el-form-item>
-        
+
         <el-form-item prop="conditionBasicDataOne" label="条件类型比较对象1">
           <el-input v-model="formData.conditionBasicDataOne" placeholder="请输入" />
         </el-form-item>

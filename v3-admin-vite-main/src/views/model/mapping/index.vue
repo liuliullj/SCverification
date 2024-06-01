@@ -99,6 +99,7 @@ const handleUpdate = (row: GetMappingRequestData) => {
       basicDataInputList.push(item)
       basicDataOutputList.push(item)
     }
+    basicDataInputList.push({'name': 'Null'})
     mappingInputBasicDataOptions.value = basicDataInputList
     basicDataOutputList.push({'name': 'Null'})
     mappingOutputBasicDataOptions.value = basicDataOutputList
@@ -125,6 +126,7 @@ const handleInsertClick = () => {
       basicDataInputList.push(item)
       basicDataOutputList.push(item)
     }
+    basicDataInputList.push({'name': 'Null'})
     mappingInputBasicDataOptions.value = basicDataInputList
     basicDataOutputList.push({'name': 'Null'})
     mappingOutputBasicDataOptions.value = basicDataOutputList
@@ -202,7 +204,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchMa
       <div class="toolbar-wrapper">
         <div>
           <el-button type="primary" :icon="CirclePlus" @click="handleInsertClick">新增映射类型</el-button>
-          <el-button type="danger" :icon="Delete">批量删除</el-button>
+          <!-- <el-button type="danger" :icon="Delete">批量删除</el-button> -->
         </div>
         <div>
           <el-tooltip content="刷新当前页">
@@ -251,25 +253,25 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchMa
         <el-form-item prop="mappingName" label="映射类型名称">
           <el-input v-model="formData.mappingName" placeholder="请输入" />
         </el-form-item>
-        
+
         <el-form-item prop="mappingInputBasicData" label="映射类型输入参数">
           <el-select v-model="formData.mappingInputBasicData" multiple placeholder="请选择"  style="width:100%">
-            <el-option 
-              v-for="item in mappingInputBasicDataOptions" 
-              :key="item.name" 
-              :label="item.name" 
-              :value="item.name" 
+            <el-option
+              v-for="item in mappingInputBasicDataOptions"
+              :key="item.name"
+              :label="item.name"
+              :value="item.name"
             />
           </el-select>
         </el-form-item>
 
         <el-form-item prop="mappingOutputBasicData" label="映射类型输出参数">
           <el-select v-model="formData.mappingOutputBasicData" multiple placeholder="请选择"  style="width:100%">
-            <el-option 
-              v-for="item in mappingOutputBasicDataOptions" 
-              :key="item.name" 
-              :label="item.name" 
-              :value="item.name" 
+            <el-option
+              v-for="item in mappingOutputBasicDataOptions"
+              :key="item.name"
+              :label="item.name"
+              :value="item.name"
             />
           </el-select>
         </el-form-item>

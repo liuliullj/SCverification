@@ -11,9 +11,7 @@ defineOptions({
   name: "Structure"
 })
 
-const verificationResult = ref("Hello World!" + '这里是长文本内容\n，如果行数\n增多\n，滚动条\n会自动\n出现。' +
-            '\n可以通过\n在这里添加更多\n的文本\n来测\n试\n滚动条的效果。' +
-            '\n文本行数越多，滚动条\n越有\n可能\n出现。');
+const verificationResult = ref("请点击验证按钮进行验证" );
 const loading = ref<boolean>(false)
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
 

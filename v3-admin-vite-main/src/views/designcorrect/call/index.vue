@@ -11,9 +11,7 @@ defineOptions({
   name: "Call"
 })
 
-const verificationResult = ref("Hello World!" + '这里是长文本内容\n，如果行数\n增多\n，滚动条\n会自动\n出现。' +
-            '\n可以通过\n在这里添加更多\n的文本\n来测\n试\n滚动条的效果。' +
-            '\n文本行数越多，滚动条\n越有\n可能\n出现。');
+const verificationResult = ref("请点击验证按钮进行验证");
 const loading = ref<boolean>(false)
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
 
@@ -143,9 +141,9 @@ watch([() => callPaginationData.currentPage, () => callPaginationData.pageSize],
       <div class="table-wrapper">
         <el-table :data="callData">
           <el-table-column type="selection" width="50" align="center" />
-          <el-table-column prop="id" label="Id" align="center" />
-          <el-table-column prop="pathId" label="路径编号" align="center" />
-          <el-table-column prop="pathName" label="路径名称" align="center" />
+          <!-- <el-table-column prop="id" label="Id" align="center" /> -->
+          <el-table-column prop="pathId" label="路径编号" align="center"  width="150"/>
+          <el-table-column prop="pathName" label="路径名称" align="center" width="250" />
           <el-table-column prop="pathExpression" label="路径表达式" align="center" />
           <el-table-column fixed="right" label="操作" width="150" align="center">
             <template #default="scope">
@@ -172,7 +170,7 @@ watch([() => callPaginationData.currentPage, () => callPaginationData.pageSize],
       </div>
       <div class="toolbar-wrapper">
         <div>
-          <el-button type="primary" :icon="CirclePlus" @click="verifyAll()">验证全部需求</el-button>
+          <el-button type="primary" :icon="CirclePlus" @click="verifyAll()">验证全部路径</el-button>
         </div>
       </div>
       <div class="app-container">

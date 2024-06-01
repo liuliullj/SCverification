@@ -34,6 +34,7 @@
     "mitt": "3.0.1",
     "normalize.css": "8.0.1",
     "nprogress": "0.2.0",
+    "papaparse": "^5.4.1",
     "path-browserify": "1.0.1",
     "path-to-regexp": "6.2.1",
     "pinia": "2.1.7",
@@ -43,7 +44,8 @@
     "vue-router": "4.3.0",
     "vxe-table": "4.4.1",
     "vxe-table-plugin-element": "3.0.7",
-    "xe-utils": "3.5.11"
+    "xe-utils": "3.5.11",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/js-cookie": "3.0.6",

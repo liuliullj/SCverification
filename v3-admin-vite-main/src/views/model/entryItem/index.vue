@@ -220,7 +220,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchEn
       <div class="toolbar-wrapper">
         <div>
           <el-button type="primary" :icon="CirclePlus" @click="handleInsertClick">新增合约条目类型</el-button>
-          <el-button type="danger" :icon="Delete">批量删除</el-button>
+          <!-- <el-button type="danger" :icon="Delete">批量删除</el-button> -->
         </div>
         <div>
           <el-tooltip content="刷新当前页">
@@ -269,25 +269,25 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], fetchEn
         <el-form-item prop="entryItemName" label="合约条目类型名称">
           <el-input v-model="formData.entryItemName" placeholder="请输入" />
         </el-form-item>
-        
+
         <el-form-item prop="entryItemConditions" label="合约条目类型执行条件">
           <el-select v-model="formData.entryItemConditions" multiple placeholder="请选择"  style="width:100%">
-            <el-option 
-              v-for="item in conditionOptions" 
-              :key="item.name" 
-              :label="item.name" 
-              :value="item.name" 
+            <el-option
+              v-for="item in conditionOptions"
+              :key="item.name"
+              :label="item.name"
+              :value="item.name"
             />
           </el-select>
         </el-form-item>
 
         <el-form-item prop="entryItemAgreements" label="合约条目类型组成约定">
           <el-select v-model="formData.entryItemAgreements" multiple placeholder="请选择"  style="width:100%">
-            <el-option 
-              v-for="item in agreementOptions" 
-              :key="item.name" 
-              :label="item.name" 
-              :value="item.name" 
+            <el-option
+              v-for="item in agreementOptions"
+              :key="item.name"
+              :label="item.name"
+              :value="item.name"
             />
           </el-select>
         </el-form-item>
