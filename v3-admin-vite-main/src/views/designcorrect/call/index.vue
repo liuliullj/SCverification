@@ -179,11 +179,11 @@ watch([() => callPaginationData.currentPage, () => callPaginationData.pageSize],
             {{ verificationResult }}
           </div>
         </el-card> -->
-        <el-card class="box-card" header="验证结果">
+       <el-card class="box-card" header="验证结果">
           <div slot="header" class="clearfix custom-header scoller-display">
             <span>{{ verificationResult }}</span>
           </div>
-      </el-card>
+       </el-card>
       </div>
     </el-card>
   </div>
@@ -251,7 +251,7 @@ watch([() => callPaginationData.currentPage, () => callPaginationData.pageSize],
 }
 
 .scoller-display {
-  max-height: 300px; /* 最大高度，超过这个高度会显示滚动条 */
+  max-height: 600px; /* 最大高度，超过这个高度会显示滚动条 */
   overflow-y: auto; /* 垂直方向上溢出内容时显示滚动条 */
   padding: 10px;
   border: 1px solid #ccc; /* 边框样式 */

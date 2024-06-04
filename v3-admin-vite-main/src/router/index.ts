@@ -231,7 +231,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/designcorrect/structure/index.vue"),
         name: "Structure",
         meta: {
-          title: "结构正确性验证",
+          title: "结构完整性验证",
           keepAlive: true
         }
       },

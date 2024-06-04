@@ -60,12 +60,15 @@ def checkTimestampDependency(projectname, pathExpression):
             fetch_condition_sql = f"SELECT * FROM `{condition_table_name}` WHERE conditionName = %s"
             condition = fetch_one(fetch_condition_sql, (item, ))
             if condition:
+                print(condition)
                 conditionBasicDataOne = condition["conditionBasicDataOne"]
+                print(conditionBasicDataOne)
                 conditionBasicDataTwo = condition["conditionBasicDataTwo"]
                 fetch_basicdata_sql = f"SELECT * FROM `{basicdata_table_name}` WHERE basicDataName = %s"
                 basicdata1 = fetch_one(fetch_basicdata_sql, (conditionBasicDataOne, ))
                 basicdata2 = fetch_one(fetch_basicdata_sql, (conditionBasicDataTwo, ))
                 if basicdata1:
+                    print(basicdata1)
                     if "timestamp" in basicdata1["basicDataExpression"]:
                         return item
                 if basicdata2:
@@ -181,7 +184,7 @@ def verifySecurity():
     if whetherDos:
         result += "路径"+pathName+"存在拒绝服务攻击漏洞，验证不通过！\n"
 
-    if "不通过" not in result:
+    if "不通过" not in result and not whetherDos:
         result += "路径"+pathName+"不存在安全漏洞，验证通过！\n"
 
     return jsonify({"result": result}), 200
@@ -212,7 +215,7 @@ def verifyAll():
         if whetherDos:
             pathresult += "路径" + path['pathname'] + "存在拒绝服务攻击漏洞，验证不通过！\n"
 
-        if "不通过" not in result:
+        if "不通过" not in result and not whetherDos:
             pathresult += "路径" + path['pathname'] + "不存在安全漏洞，验证通过！\n"
 
         result += pathresult

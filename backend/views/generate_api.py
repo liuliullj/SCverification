@@ -98,6 +98,7 @@ def generateAgree(projectname,agree):
     WHERE = agree["agreementName"] +"("
     WHILE = agree["agreementName"] +"("
     INPUT = set()
+    FUNCTIONS = ""
     agreementInterfaces = agree["agreementInterfaces"].replace(" ", "").replace("\t", "")
     interfaces = agreementInterfaces.split(";")
     for item in interfaces:
@@ -132,15 +133,19 @@ def generateAgree(projectname,agree):
                     if not flagOutput and not flaginput:
                         WHERE += methodname+";"
                         INPUT = INPUT.union(set(inputdatas))
+                        function = "function " + methodname +" ( "+mappingInputBasicData+" ) " + " returns ( " + mappingOutputBasicData + " ) \n"
+                        FUNCTIONS += function
                     if not flagOutput and flaginput:
                         WHILE += methodname+";"
                         INPUT = INPUT.union(set(inputdatas))
+                        function = "function " + methodname +" ( "+mappingInputBasicData+" ) " + " returns ( " + mappingOutputBasicData + " ) \n"
+                        FUNCTIONS += function
 
     WHERE = WHERE[:-1]
     WHILE = WHILE[:-1]
     WHERE += ")"
     WHILE += ")"
-    return INPUT, WHERE, WHILE
+    return INPUT, WHERE, WHILE, FUNCTIONS
 
 
 def generateSmartContract(projectname, demandId, scids):
@@ -203,12 +208,13 @@ def generateSmartContract(projectname, demandId, scids):
                     searchagreesql = f"SELECT * FROM `{agreement_table_name}` WHERE agreementName = %s"
                     agree = fetch_one(searchagreesql, (item, ))
                     if agree:
-                        INPUTtemp, WHEREtemp, WHILEtemp = generateAgree(projectname,agree)
+                        INPUTtemp, WHEREtemp, WHILEtemp, FUNCTIONS= generateAgree(projectname,agree)
                         INPUT = INPUT.union(INPUTtemp)
                         WHERE += WHEREtemp+ ";"
                         if "(" in WHILEtemp:
                             WHILE += WHILEtemp + ";"
 
+                        result += FUNCTIONS
                 inputdata = ""
                 for k in INPUT:
                     if k != "Null":

@@ -204,7 +204,7 @@ def getVerifyTwoPath(projectname, pathId, pathName, pathExpression):
         result += result2
 
     else:
-        result += "路径"+pathName+"不符合路径表达式规范，验证失败！\n"
+        result += "路径"+pathName+"不符合路径表达式规范，验证不通过！\n"
     return result
 
 
